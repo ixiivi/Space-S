@@ -1,0 +1,48 @@
+# 빌드 결과물
+build/
+DerivedData/
+*.xcworkspace
+*.xcodeproj
+*.xcuserstate
+*.xcuserdata
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Playground
+timeline.xctimeline
+playground.xcworkspace
+
+# 개인 설정
+*.xcuserdatad
+*.swp
+
+# macOS 시스템 파일
+.DS_Store
+
+# 패키지 매니저
+Packages/
+Package.pins
+Package.resolved
+.swiftpm/
+
+# Carthage
+Carthage/Build/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# 아카이브 파일
+*.zip
+*.tar.gz
+
+# 로그 파일 무시
+*.log
+
+# 환경 설정 파일 무시
+.env
+
+# 기타
+*.orig

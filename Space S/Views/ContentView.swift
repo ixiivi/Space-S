@@ -16,8 +16,16 @@ struct ContentView: View {
             Text("Hello, world!")
         }
         .padding()
+        .onAppear{
+            LogTest()
+        }
     }
 }
+
+func LogTest(){
+    Logger.logInfo("App started successfully.")
+}
+
 
 #Preview {
     ContentView()

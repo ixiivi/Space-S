@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8F0F6D062DCE42E1005F2EAB /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 8F0F6D052DCE42DA005F2EAB /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		8F0F6CE92DCE4140005F2EAB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		8F0F6CD82DCE413E005F2EAB /* Space S.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space S.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F0F6CE82DCE4140005F2EAB /* Space STests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Space STests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F0F6CF22DCE4140005F2EAB /* Space SUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Space SUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F0F6D052DCE42DA005F2EAB /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +80,7 @@
 		8F0F6CCF2DCE413E005F2EAB = {
 			isa = PBXGroup;
 			children = (
+				8F0F6D052DCE42DA005F2EAB /* .gitignore */,
 				8F0F6CDA2DCE413E005F2EAB /* Space S */,
 				8F0F6CEB2DCE4140005F2EAB /* Space STests */,
 				8F0F6CF52DCE4140005F2EAB /* Space SUITests */,
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F0F6D062DCE42E1005F2EAB /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,6 +405,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Space S/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -426,6 +434,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Space S/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
