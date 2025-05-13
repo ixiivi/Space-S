@@ -1,7 +1,21 @@
-CEE4408 Construction Project Management Final Project
+CEE4408 Construction Project Management Final Project  
+
+Project Overview
+
+In a future where war between humans and AI has rendered coexistence on Earth impossible, this application is designed to support the relocation of high-intelligence AI robots to Mars. Following a historic agreement between humans and AI, each person is allowed to send one robot to Mars. In exchange, participants receive the right to invest in the planet’s rare minerals.  
+
+This app streamlines the entire process, offering an intuitive and efficient platform for users. Its key features include:  
+- Robot Selection and Ordering: Users can select and customize their AI robots for Mars deployment.  
+- Launch Process Management: Monitor and manage the launch sequence of the robots.  
+- Scheduler: Plan and track timelines for robot deployment.  
+- Delivery Schedule Management: Oversee the transportation and delivery logistics to Mars.  
+- Dividend Management: Manage investment returns from Mars’ rare mineral resources.  
+
+This application provides a seamless experience, bridging the gap between Earth-based users and the complexities of interplanetary relocation and investment.  
 
 ICON  
-<img src="https://github.com/user-attachments/assets/86128de0-53c0-4132-b47c-990dd875ef31" width="80"/>
+<img src="https://github.com/user-attachments/assets/86128de0-53c0-4132-b47c-990dd875ef31" width="80"/>  
+The main application icon symbolizes the dynamic launch of a rocket, representing the ambition and innovation of construction project management. Set against a sleek black background, it features a white arch-shaped trajectory, evoking the path of a rocket soaring into space. This intuitive and modern design captures the essence of progress and precision.  
 
 LoadingView  
 <img src="https://github.com/user-attachments/assets/57f75923-cf87-41c1-8c76-fb2776183dda" width="150"/>
