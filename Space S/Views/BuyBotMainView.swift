@@ -12,6 +12,31 @@ import SwiftUI
 struct BuyBotMainView: View {
     @Binding var path: [Route] // LoginView의 path 공유
     @State private var selectedModel: String = "Gen6" // 기본 선택: Gen6
+    @StateObject private var bot1: Bot
+    @StateObject private var bot2: Bot
+    
+    init(path: Binding<[Route]>) {
+        self._path = path
+        
+        // 기본 Bot 인스턴스 생성 (Gen6를 기본값으로 사용)
+        let defaultBot: Bot
+        if let bot = Bot(modelName: "Gen6") {
+            defaultBot = bot
+        } else {
+            // Gen6도 실패하면 기본값으로 초기화
+            defaultBot = Bot(modelName: "Gen6") ?? Bot(modelName: "Gen4") ?? {
+                let bot = Bot(modelName: "Gen5")!
+                Logger.logError("Using Gen5 as fallback bot")
+                return bot
+            }()
+        }
+        
+        // Gen6와 Gen5 Bot 초기화
+        _bot1 = StateObject(wrappedValue: Bot(modelName: "Gen6") ?? defaultBot)
+        _bot2 = StateObject(wrappedValue: Bot(modelName: "Gen5") ?? defaultBot)
+        
+        //Logger.logInfo("BuyBotMainView initialized with Gen6: \(_bot1.wrappedValue.model), Gen5: \(_bot2.wrappedValue.model)")
+    }
 
     var body: some View {
         ZStack {
@@ -38,7 +63,7 @@ struct BuyBotMainView: View {
         }
         .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
-        .navigationTitle("Build Mars’ AI Civilization")
+        .navigationTitle("Build Mars' AI Civilization")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -59,17 +84,17 @@ struct BuyBotMainView: View {
     // 헤더 섹션
     private var headerSection: some View {
         VStack(spacing: 16) {
-            Image(selectedModel == "Gen6" ? "optimus_gen6" : "optimus_gen5")
+            Image(selectedModel == "Gen6" ? "Gen6" : "Gen5")
                 .resizable()
                 .scaledToFill()
                 .frame(height: 400)
                 .clipped()
 
-            Text("Optimus \(selectedModel): Mars’ AI Citizen")
+            Text("Optimus \(selectedModel): Mars' AI Citizen")
                 .font(.system(size: 48, weight: .bold))
                 .foregroundColor(.white)
 
-            Text(selectedModel == "Gen6" ? "Send an advanced AI citizen to lead Mars’ autonomous cities and secure your survival on Earth." : "Deploy a reliable AI resident to support Mars’ growing civilization and ensure your war exemption.")
+            Text(selectedModel == "Gen6" ? "Send an advanced AI citizen to lead Mars' autonomous cities and secure your survival on Earth." : "Deploy a reliable AI resident to support Mars' growing civilization and ensure your war exemption.")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
@@ -119,7 +144,7 @@ struct BuyBotMainView: View {
                 )
                 FeatureCard(
                     title: "Extended Operation",
-                    description: "72-hour autonomy with solar charging, optimized for continuous city management in Mars’ harsh environment.",
+                    description: "72-hour autonomy with solar charging, optimized for continuous city management in Mars' harsh environment.",
                     icon: "battery.100"
                 )
             }
