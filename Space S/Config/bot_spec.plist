@@ -7,11 +7,11 @@
 		<key>model</key>
 		<string>Gen5</string>
 		<key>price</key>
-		<string>$40,000</string>
+		<string>40,000</string>
 		<key>shipping_cost</key>
-		<string>$15,000</string>
+		<string>15,000</string>
 		<key>estimatedDelivery</key>
-		<string>Q1 2036</string>
+		<string>January 2036</string>
 		<key>hardware</key>
 		<dict>
 			<key>cpu</key>
@@ -34,8 +34,14 @@
 		</dict>
 		<key>physical</key>
 		<dict>
+			<key>hand_dof</key>
+			<string>11</string>
+			<key>payload</key>
+			<string>45 lb (20 kg)</string>
+			<key>height</key>
+			<string>5 ft 10 in (178 cm)</string>
 			<key>weight</key>
-			<string>50 kg</string>
+			<string>57 kg</string>
 			<key>dimensions</key>
 			<string>1.6m x 0.6m x 0.6m</string>
 			<key>material</key>
@@ -49,11 +55,11 @@
 		<key>model</key>
 		<string>Gen6</string>
 		<key>price</key>
-		<string>$60,000</string>
+		<string>60,000</string>
 		<key>shipping_cost</key>
-		<string>$15,000</string>
+		<string>17,000</string>
 		<key>estimatedDelivery</key>
-		<string>Q3 2034</string>
+		<string>July 2034</string>
 		<key>hardware</key>
 		<dict>
 			<key>cpu</key>
@@ -72,11 +78,15 @@
 			</array>
 			<key>aiCapabilities</key>
 			<string>Reinforcement Learning-based Control, End-to-End Neural Network, Beyond human-level performance</string>
-			<key>mobility</key>
-			<string>Bipedal Walking</string>
 		</dict>
 		<key>physical</key>
 		<dict>
+			<key>hand_dof</key>
+			<string>22</string>
+			<key>payload</key>
+			<string>60 lb (27 kg)</string>
+			<key>height</key>
+			<string>5 ft 8 in (173 cm)</string>
 			<key>weight</key>
 			<string>60 kg</string>
 			<key>dimensions</key>

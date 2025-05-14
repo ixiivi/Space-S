@@ -1,0 +1,414 @@
+아래에서 단일 사용자 정보 저장에 적합한 방법을 비교하고, 추천 방식(JSON 파일 + Codable)을 중심으로 구현 예시와 사용 방법을 설명하겠습니다. 간단함, 구현 용이성, 앱 요구사항(`users`, `orders`, `cpm_schedules`) 충족을 우선 고려합니다.
+
+---
+
+### 1. 단일 사용자 저장 방식 비교
+
+#### **1.1 JSON 파일 (Codable + 로컬 파일)**
+- **설명**: `db.json`과 같은 JSON 데이터를 앱의 Documents 디렉토리에 저장하고, Swift의 `Codable`로 파싱/저장.
+- **장점**:
+  - JSON 구조(`users`, `orders`, `cpm_schedules`)를 그대로 유지, 이전 코드 재사용 가능.
+  - 단일 사용자 데이터(예: Jaehyun의 정보, 주문, CPM 스케줄)를 체계적으로 관리.
+  - 구현 간단, 디버깅 쉬움(텍스트 파일로 확인 가능).
+  - 숙제용으로 서버 없이 완전 오프라인 동작.
+- **단점**:
+  - 데이터가 많아지면 파일 입출력 성능 저하(숙제용 단일 사용자에겐 무관).
+  - 암호화 없음(숙제용이라 보안 덜 중요).
+- **적합성**: `db.json` 구조를 선호하고, 사용자 정보, 주문, CPM 데이터를 JSON 형태로 저장하려는 요구사항에 최적.
+
+#### **1.2 UserDefaults**
+- **설명**: iOS의 경량 저장소로, 키-값 쌍으로 데이터 저장(예: `"user"`: `{ "id": 448134651345, ... }`).
+- **장점**:
+  - 매우 간단, 파일 관리 불필요.
+  - 소량 데이터(단일 사용자 정보)에 적합.
+  - 기본 제공 API, 추가 설정 없음.
+- **단점**:
+  - 복잡한 구조(`orders`, `cpm_schedules`의 배열) 관리 불편.
+  - JSON처럼 직관적이지 않음, 디버깅 어려움.
+- **적합성**: 단순한 사용자 정보만 저장할 때 적합, 하지만 주문과 CPM 데이터까지 포함하려면 비효율적.
+
+#### **1.3 Core Data**
+- **설명**: iOS의 객체-관계 매핑(ORM) 데이터베이스로, 엔터티(`User`, `Order`, `CPMSchedule`) 정의 후 SQLite 저장.
+- **장점**:
+  - 관계형 데이터 관리 강력(`userId`로 `orders` 연결).
+  - 대량 데이터 처리 가능.
+- **단점**:
+  - 숙제용으로 과도하게 복잡(엔터티 설계, 스키마 관리).
+  - 학습 곡선 높음.
+- **적합성**: 단일 사용자에겐 불필요, 다중 사용자나 복잡한 쿼리 시 적합.
+
+#### **1.4 Property List (plist)**
+- **설명**: XML 또는 바이너리 형식으로 데이터 저장, `Codable`로 직렬화 가능.
+- **장점**:
+  - JSON과 유사, iOS 기본 지원.
+- **단점**:
+  - JSON에 비해 디버깅 덜 직관적.
+  - 특별한 이점 없음(JSON으로 충분).
+- **적합성**: JSON이 이미 익숙하므로 불필요.
+
+---
+
+### 2. 추천 방식: JSON 파일 + Codable
+**JSON 파일** 방식이 숙제용 앱에 가장 적합합니다. 이유는 다음과 같습니다:
+- **간단함**: `db.json` 구조를 그대로 사용, 서버 없이 로컬 저장.
+- **유연성**: 사용자 정보, 주문, CPM 스케줄링 데이터를 체계적으로 관리.
+- **재사용성**: 이전 코드(`TempServer.json`, `db.json`)와 호환.
+- **오프라인**: 서버 구축 없이 단일 사용자 데이터 저장/로드 가능.
+- **숙제 적합**: 디버깅 쉬움, JSON 파일로 결과 확인 가능.
+
+#### **수정된 db.json (단일 사용자 중심)**
+단일 사용자를 위해 `users` 배열을 단일 객체로 단순화하고, `orders`와 `cpm_schedules`는 유지하되 최소화합니다.
+
+```json
+{
+  "user": {
+    "id": 448134651345,
+    "first_name": "Jaehyun",
+    "last_name": "Kim",
+    "country": "Korea",
+    "bot": "Gen6 Robot",
+    "sponsor": "Quantum Sponsor"
+  },
+  "orders": [
+    {
+      "id": 1,
+      "userId": 448134651345,
+      "robot_model": "Gen6 Robot",
+      "price": "$17000",
+      "shipping_cost": "$500",
+      "sponsor_delivery_benefit": "",
+      "order_date": "2025-05-14T11:41:00Z"
+    }
+  ],
+  "cpm_schedules": {
+    "schedule_id": 1,
+    "tasks": [
+      {
+        "task_id": "A",
+        "name": "Robot Assembly",
+        "duration": 5,
+        "dependencies": [],
+        "is_critical": true
+      },
+      {
+        "task_id": "B",
+        "name": "AI Integration",
+        "duration": 3,
+        "dependencies": ["A"],
+        "is_critical": true
+      }
+    ]
+  }
+}
+```
+
+```json
+{
+  "user": {
+    "id": 448134651345,
+    "first_name": "Jaehyun",
+    "last_name": "Kim",
+    "country": "Korea",
+    "bot": "Gen6 Robot",
+    "sponsor": "Quantum Sponsor"
+  },
+  "orders": [
+    {
+      "id": 1,
+      "userId": 448134651345,
+      "robot_model": "Gen6 Robot",
+      "price": "$17000",
+      "shipping_cost": "$500",
+      "sponsor_delivery_benefit": "",
+      "order_date": "2025-05-14T11:41:00Z"
+    }
+  ],
+  "cpm_schedules": {
+    "schedule_id": 1,
+    "tasks": [
+      {
+        "task_id": "A",
+        "name": "Robot Assembly",
+        "duration": 5,
+        "dependencies": [],
+        "is_critical": true
+      },
+      {
+        "task_id": "B",
+        "name": "AI Integration",
+        "duration": 3,
+        "dependencies": ["A"],
+        "is_critical": true
+      }
+    ]
+  }
+}
+```
+
+- **변경점**:
+  - `users` → `user`: 단일 사용자 객체로 단순화.
+  - `orders`: 단일 주문 유지, 필요 시 추가 가능.
+  - `cpm_schedules`: 최소 작업(Assembly, Integration)만 포함, CPM 시각화용.
+
+---
+
+### 3. 구현 코드
+
+#### **Codable 모델**
+JSON 구조를 Swift `Codable`로 매핑합니다.
+
+```swift
+import Foundation
+
+struct Database: Codable {
+    let user: User
+    let orders: [Order]
+    let cpmSchedules: CPMSchedule
+    
+    enum CodingKeys: String, CodingKey {
+        case user
+        case orders
+        case cpmSchedules = "cpm_schedules"
+    }
+}
+
+struct User: Codable {
+    let id: Int
+    let firstName: String
+    let lastName: String
+    let country: String
+    let bot: String?
+    let sponsor: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case firstName = "first_name"
+        case lastName = "last_name"
+        case country
+        case bot
+        case sponsor
+    }
+}
+
+struct Order: Codable {
+    let id: Int
+    let userId: Int
+    let robotModel: String
+    let price: String
+    let shippingCost: String
+    let sponsorDeliveryBenefit: String
+    let orderDate: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId
+        case robotModel = "robot_model"
+        case price
+        case shippingCost = "shipping_cost"
+        case sponsorDeliveryBenefit = "sponsor_delivery_benefit"
+        case orderDate = "order_date"
+    }
+}
+
+struct CPMSchedule: Codable {
+    let scheduleId: Int
+    let tasks: [Task]
+    
+    enum CodingKeys: String, CodingKey {
+        case scheduleId = "schedule_id"
+        case tasks
+    }
+}
+
+struct Task: Codable {
+    let taskId: String
+    let name: String
+    let duration: Int
+    let dependencies: [String]
+    let isCritical: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case taskId = "task_id"
+        case name
+        case duration
+        case dependencies
+        case isCritical = "is_critical"
+    }
+}
+```
+
+#### **JSON 파일 읽기/쓰기**
+Documents 디렉토리에 `db.json`을 저장하고 관리합니다.
+
+```swift
+import Foundation
+
+func readDatabase(from filePath: String) -> Database? {
+    do {
+        let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
+        return try JSONDecoder().decode(Database.self, from: data)
+    } catch {
+        print("Error reading db.json: \(error)")
+        return nil
+    }
+}
+
+func saveDatabase(_ database: Database, to filePath: String) -> Bool {
+    do {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let data = try encoder.encode(database)
+        try data.write(to: URL(fileURLWithPath: filePath))
+        return true
+    } catch {
+        print("Error saving db.json: \(error)")
+        return false
+    }
+}
+
+func copyJSONToDocuments() {
+    guard let sourceURL = Bundle.main.url(forResource: "db", withExtension: "json") else {
+        print("db.json not found in bundle")
+        return
+    }
+    let destURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("db.json")
+    do {
+        if !FileManager.default.fileExists(atPath: destURL.path) {
+            try FileManager.default.copyItem(at: sourceURL, to: destURL)
+            print("db.json copied to Documents")
+        }
+    } catch {
+        print("Error copying db.json: \(error)")
+    }
+}
+```
+
+#### **SwiftUI 뷰**
+단일 사용자 데이터를 표시하고 업데이트하는 예시입니다.
+
+```swift
+import SwiftUI
+
+struct UserDataView: View {
+    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("db.json").path
+    @State private var database: Database?
+    @State private var statusMessage = ""
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            if let db = database {
+                VStack(alignment: .leading) {
+                    Text("User: \(db.user.firstName) \(db.user.lastName)")
+                        .font(.title)
+                    Text("Bot: \(db.user.bot ?? "None")")
+                    Text("Sponsor: \(db.user.sponsor ?? "None")")
+                    Text("Orders: \(db.orders.count)")
+                    Text("CPM Tasks: \(db.cpmSchedules.tasks.count)")
+                }
+                Button("Update Bot and Sponsor") {
+                    if var db = database {
+                        db.user = User(
+                            id: db.user.id,
+                            firstName: db.user.firstName,
+                            lastName: db.user.lastName,
+                            country: db.user.country,
+                            bot: "Gen5 Robot",
+                            sponsor: "Basic Sponsor"
+                        )
+                        if saveDatabase(db, to: filePath) {
+                            database = db
+                            statusMessage = "Update successful!"
+                        } else {
+                            statusMessage = "Update failed."
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            } else {
+                Text("Loading data...")
+            }
+            Text(statusMessage)
+                .foregroundColor(statusMessage.contains("success") ? .green : .red)
+        }
+        .padding()
+        .onAppear {
+            copyJSONToDocuments()
+            database = readDatabase(from: filePath)
+        }
+    }
+}
+
+struct UserDataView_Previews: PreviewProvider {
+    static var previews: some View {
+        UserDataView()
+    }
+}
+```
+
+---
+
+### 4. 사용 방법
+1. **프로젝트 설정**:
+   - `db.json` 파일을 Xcode 프로젝트에 추가 (드래그 또는 `Add Files to...`).
+   - Build Phases에서 `Copy Bundle Resources`에 포함 확인.
+
+2. **초기화**:
+   - 앱 실행 시 `copyJSONToDocuments()`가 `db.json`을 Documents 디렉토리에 복사.
+   - `readDatabase`로 데이터 로드.
+
+3. **데이터 사용**:
+   - `UserDataView`에서 사용자 정보 표시.
+   - 버튼으로 `bot`, `sponsor` 업데이트 (예: Gen5 Robot, Basic Sponsor).
+   - `orders` 추가: `db.orders.append(Order(...))` 후 저장.
+   - CPM 데이터: `db.cpmSchedules.tasks`로 간트 차트 렌더링.
+
+4. **디버깅**:
+   - Documents 디렉토리에서 `db.json` 확인:
+     ```swift
+     print("File path: \(filePath)")
+     ```
+   - Finder에서 `filePath` 열어 JSON 수정 확인.
+
+---
+
+### 5. 숙제용 적합성
+- **간단함**: JSON 파일 읽기/쓰기는 몇 줄의 코드로 구현 가능.
+- **단일 사용자**: `user` 객체로 Jaehyun의 데이터만 관리, 불필요한 복잡성 제거.
+- **앱 통합**:
+  - `SponsorshipOptionsView`: `orders`에 새 주문 추가.
+  - `GanttChartView`: `cpm_schedules.tasks` 로드.
+  - `convertPriceToInt`: `orders.price` 계산.
+- **오프라인**: 서버 없이 완전 동작, 숙제 제출용으로 충분.
+- **확장성**: 숙제 범위를 벗어나지 않으며, JSON 구조로 데이터 쉽게 수정 가능.
+
+---
+
+### 6. 주의사항
+- **파일 경로**: `db.json`이 프로젝트에 포함되어야 함. 없다면 빈 JSON 파일 생성 로직 추가:
+  ```swift
+  if !FileManager.default.fileExists(atPath: filePath) {
+      let emptyDB = Database(
+          user: User(id: 448 448134651345, firstName: "Jaehyun", lastName: "Kim", country: "Korea", bot: nil, sponsor: nil),
+          orders: [],
+          cpmSchedules: CPMSchedule(scheduleId: 1, tasks: [])
+      )
+      saveDatabase(emptyDB, to: filePath)
+  }
+  ```
+- **에러 처리**: `readDatabase` 실패 시 기본값 표시(예: "No data").
+- **데이터 크기**: 단일 사용자라 크기 문제 없음, 하지만 `orders`가 많아지면 간트 차트 렌더링 최적화 고려.
+- **과제 제출**: `db.json` 파일과 앱 실행 화면 캡처 포함 추천.
+
+---
+
+### 7. 추가 요청
+- **특정 기능**: 주문 추가, CPM 작업 업데이트 등 특정 데이터 수정 코드 필요하면 말씀해주세요.
+- **UI 디자인**: `UserDataView`에 더 많은 정보(예: 주문 목록, CPM 차트 미리보기) 추가 원하면 공유.
+- **테스트 데이터**: Jaehyun 외 더미 데이터 추가 원하면 요청.
+- **디버깅**: JSON 파일 위치나 에러 발생 시 알려주시면 디버깅 도움.
+

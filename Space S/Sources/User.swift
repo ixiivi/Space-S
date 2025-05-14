@@ -12,7 +12,8 @@
 //    @Published public var name: String
 //    @Published public var email: String
 //    @Published public var createdAt: Date
-//    @Published public var orders: [RobotOrder]
+//    @StateObject private var bot: Bot
+//    @StateObject private var sponsor:OrderSponsorList
 //
 //    enum CodingKeys: String, CodingKey {
 //        case id, name, email, createdAt, orders
@@ -23,7 +24,6 @@
 //        self.name = name
 //        self.email = email
 //        self.createdAt = Date()
-//        self.orders = []
 //    }
 //
 //    public func addOrder(_ order: RobotOrder) {

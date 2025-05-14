@@ -52,7 +52,7 @@
 		<key>deliveryBenefit</key>
 		<string>6 months faster</string>
 		<key>speedUpDay</key>
-		<integer>360</integer>
+		<integer>180</integer>
 		<key>dividend</key>
 		<string>2.3% dividend</string>
 		<key>id</key>
@@ -66,7 +66,7 @@
 		<key>deliveryBenefit</key>
 		<string>6 months faster</string>
 		<key>speedUpDay</key>
-		<integer>370</integer>
+		<integer>187</integer>
 		<key>dividend</key>
 		<string>2.9% dividend</string>
 		<key>id</key>
