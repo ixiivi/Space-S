@@ -18,7 +18,7 @@ public struct BuyBotOrderView: View {
     
     public init(model: String) {
         self.model = model
-        // 기본 Bot 인스턴스 생성 (Gen6를 폴백으로 사용)
+        // 기본 Bot  인스턴스 생성 (Gen6를 폴백으로 사용)
         let defaultBot = Bot(modelName: "Gen6")!
         _bot = StateObject(wrappedValue: Bot(modelName: model) ?? defaultBot)
     }
