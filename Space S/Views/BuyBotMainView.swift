@@ -18,7 +18,7 @@ struct BuyBotMainView: View {
     init(path: Binding<[Route]>) {
         self._path = path
         
-        // 기본 Bot 인스턴스 생성 (Gen6를 기본값으로 사용)
+        // 기본 Bot 인스턴스 생성  (Gen6를 기본값으로 사용)
         let defaultBot: Bot
         if let bot = Bot(modelName: "Gen6") {
             defaultBot = bot
