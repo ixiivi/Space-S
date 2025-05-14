@@ -1,9 +1,9 @@
-//////
-//////  BuyBotOrderView.swift
-//////  Space S
-//////
-//////  Created by 김재현 on 5/10/25.
-//////
+//
+//  BuyBotOrderView.swift
+//  Space S
+//
+//  Created by 김재현 on 5/10/25.
+//
 
 import SwiftUI
 
@@ -11,7 +11,7 @@ public struct BuyBotOrderView: View {
     public let model: String
     @State private var showDelayInfo = false // For delay explanation popup
     @State private var showSponsorshipOptions = false // For sponsorship sheet
-    @State private var sponsorshipSpeedup: String? = nil // Tracks selected sponsorship speedup
+    @State private var sponsorshipSpeedup: Int? = nil // Tracks selected sponsorship speedup
     @State private var newDelivery: String? = nil // New delivery date after sponsorship
     @StateObject private var bot: Bot
     @StateObject private var sponsorList = OrderSponsorList()
@@ -23,15 +23,17 @@ public struct BuyBotOrderView: View {
         _bot = StateObject(wrappedValue: Bot(modelName: model) ?? defaultBot)
     }
     // Robot prices and shipping details
-    private var robotPrice: String {
-        bot.price
-    }
-    private var shippingCost: String {
-        bot.shippingCost
-    }
-    private var estimatedDelivery: String {
-        bot.estimatedDelivery
-    }
+    private var robotPrice: String { bot.price }
+    private var shippingCost: String { bot.shippingCost }
+    private var estimatedDelivery: String { bot.estimatedDelivery }
+//    private var totalPriceString: String {
+//            // Convert prices to Int, default to 0 if conversion fails
+//            let robotPriceInt = convertPriceToInt(robotPrice) ?? 0
+//            let shippingCostInt = convertPriceToInt(shippingCost) ?? 0
+//            // Sum and format as string with "$"
+//            let total = robotPriceInt + shippingCostInt
+//            return "\(total)"
+//        }
 
     public var body: some View {
         ZStack {
@@ -46,7 +48,7 @@ public struct BuyBotOrderView: View {
                             .scaledToFill()
                             .frame(height: 300)
                             .clipped()
-                        Text("Optimus \(model) Order")
+                        Text("Optimus \(model)")
                             .font(.system(size: 36, weight: .bold))
                             .foregroundColor(.white)
                         Text("Your AI citizen is ready for Mars deployment.")
@@ -58,34 +60,37 @@ public struct BuyBotOrderView: View {
 
                     // Robot price and details
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Robot Details")
+                        Text("Order Summary")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(.white)
                         infoRow("Model", value: "Optimus \(model)")
-                        infoRow("Price", value: robotPrice)
+                        infoRow("Price", value: "$" + robotPrice)
                     }
                     .padding(.horizontal, 32)
                     .padding(.top, 32)
 
                     // Shipping information
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Shipping Information")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.white)
-                        infoRow("Shipping Cost", value: shippingCost)
+//                        Text("Shipping Information")
+//                            .font(.system(size: 24, weight: .bold))
+//                            .foregroundColor(.white)
+                        infoRow("Shipping Cost", value: "$" + shippingCost)
                         if let newDelivery = newDelivery, let sponsorshipSpeedup = sponsorshipSpeedup {
-                            VStack(alignment: .leading, spacing: 4) {
+                            HStack {
                                 Text("Estimated Delivery")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.white)
                                     .frame(width: 150, alignment: .leading)
-                                Text(estimatedDelivery)
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.gray)
-                                    .strikethrough(true, color: .red)
-                                Text("\(newDelivery) (\(sponsorshipSpeedup))")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.green)
+                                VStack{
+                                    Text(estimatedDelivery)
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.gray)
+                                        .strikethrough(true, color: .red)
+                                    Text("\(newDelivery)")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                }
                             }
                         } else {
                             infoRow("Estimated Delivery", value: estimatedDelivery)
@@ -102,6 +107,16 @@ public struct BuyBotOrderView: View {
                     }
                     .padding(.horizontal, 32)
                     .padding(.top, 32)
+                    
+                    
+                    // Total Cost
+//                    let total = convertPriceToInt(robotPrice) + convertPriceToInt(shippingCost)
+//                    VStack(alignment: .leading, spacing: 16) {
+//                        infoRow("Total", value: "$" + "\(total)")
+//                    }
+//                    .padding(.horizontal, 32)
+//                    .padding(.top, 32)
+                    
 
                     // Expedite delivery option
                     VStack(spacing: 16) {
@@ -114,21 +129,26 @@ public struct BuyBotOrderView: View {
                                 .font(.system(size: 16, weight: .bold))
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.blue)
+                                .background(sponsorshipSpeedup == nil ? Color.blue : Color.gray)
                                 .foregroundColor(.white)
                                 .clipShape(Capsule())
                         }
                         .padding(.horizontal, 32)
+                        
                         Button(action: {
                             // Proceed without sponsoring
                             Logger.logInfo("User chose to launch without sponsoring")
                             // No change to delivery time
                         }) {
-                            Text("proceed without sponsoring")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray)
-                                .underline()
+                            Text(sponsorshipSpeedup == nil ? "proceed without sponsoring" : "Checkout")
+                                .font(.system(size: 16, weight: .bold))
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(sponsorshipSpeedup == nil ? Color.gray : Color.blue)
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
                         }
+                        .padding(.horizontal, 32)
                     }
                     .padding(.top, 32)
                     .padding(.bottom, 32)
@@ -169,17 +189,30 @@ public struct BuyBotOrderView: View {
 
     //여기 로직 다시 고쳐야됨.
     // Calculate new delivery date based on speedup
-    private func calculateNewDelivery(speedup: String) -> String {
-        let months = Int(speedup.prefix(1)) ?? 0
-        let baseDate = model == "Gen6" ? "July 2026" : "January 2026"
+    private func calculateNewDelivery(speedup: Int) -> String {
+        //let months = Int(speedup.prefix(1)) ?? 0
+        let days = speedup
+        let baseDate = "\(bot.estimatedDelivery)"
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
+        
+        if speedup == 0 {
+            newDelivery = nil
+            sponsorshipSpeedup = nil
+        }
         if let date = formatter.date(from: baseDate) {
-            if let newDate = Calendar.current.date(byAdding: .month, value: -months, to: date) {
+            if let newDate = Calendar.current.date(byAdding: .day, value: -days, to: date) {
                 return formatter.string(from: newDate)
             }
         }
         return estimatedDelivery // Fallback
+    }
+    
+    func convertPriceToInt(_ priceString: String) -> Int? {
+        // "$" 제거하고 숫자만 남김
+        let cleanString = priceString.replacingOccurrences(of: "$", with: "")
+        // Int로 변환
+        return Int(cleanString)
     }
 }
 
@@ -187,7 +220,7 @@ public struct BuyBotOrderView: View {
 // SponsorshipOptionsView
 struct SponsorshipOptionsView: View {
     let model: String
-    let onSponsor: (String) -> Void
+    let onSponsor: (Int) -> Void
     @StateObject private var sponsorList = OrderSponsorList()
     @Environment(\.dismiss) private var dismiss
 
@@ -197,6 +230,7 @@ struct SponsorshipOptionsView: View {
                 name: item.name,
                 price: item.price,
                 deliveryBenefit: item.deliveryBenefit,
+                speedUpDay: item.speedUpDay,
                 dividend: item.dividend,
                 id: item.id
             )
@@ -209,10 +243,10 @@ struct SponsorshipOptionsView: View {
                     Color.black.ignoresSafeArea()
                     ScrollView {
                         VStack(spacing: 16) {
-                            Text("Support Mars Projects")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.top, 32)
+//                            Text("Support Mars Projects")
+//                                .font(.system(size: 28, weight: .bold))
+//                                .foregroundColor(.white)
+//                                .padding(.top, 32)
                             Text("Sponsor these projects to speed up your delivery and earn dividends.")
                                 .font(.system(size: 16))
                                 .foregroundColor(.gray)
@@ -232,18 +266,30 @@ struct SponsorshipOptionsView: View {
                                         dividend: option.dividend,
                                         imageName: option.id,
                                         onSponsor: {
-                                            onSponsor(option.deliveryBenefit)
+                                            onSponsor(option.speedUpDay)
                                             dismiss()
                                         }
                                     )
+                                    
                                 }
                             }
                         }
                         .padding(.bottom, 32)
+                        Button(action: {
+                            // Proceed without sponsoring
+                            Logger.logInfo("User chose to launch without sponsoring")
+                            onSponsor(0)
+                            dismiss()
+                        }) {
+                        Text("proceed without sponsoring")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                            .underline()
+                        }
                     }
                 }
                 .preferredColorScheme(.dark)
-                .navigationTitle("Expedite Delivery")
+                .navigationTitle("Support Mars Project")
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: { dismiss() }) {
@@ -296,7 +342,7 @@ struct SponsorshipOptionsView: View {
                     .font(.system(size: 14))
                     .foregroundColor(.gray)
                 Button(action: onSponsor) {
-                    Text("Sponsor Now")
+                    Text("Add to Purchase")
                         .font(.system(size: 14, weight: .bold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)

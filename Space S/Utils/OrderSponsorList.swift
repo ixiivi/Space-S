@@ -5,7 +5,7 @@
 //  Created by 김재현 on 5/12/25.
 //
 
-//
+//** How to use. **
 //import SwiftUI
 //
 //struct SponsorListView: View {
@@ -30,6 +30,7 @@ struct Sponsorship: Identifiable, Codable {
     let name: String
     let price: String
     let deliveryBenefit: String
+    let speedUpDay: Int
     let dividend: String
     let id: String
 }

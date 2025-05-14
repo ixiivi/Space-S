@@ -24,7 +24,7 @@ struct BuyBotMainView: View {
             defaultBot = bot
         } else {
             // Gen6도 실패하면 기본값으로 초기화
-            defaultBot = Bot(modelName: "Gen6") ?? Bot(modelName: "Gen4") ?? {
+            defaultBot = Bot(modelName: "Gen6") ?? Bot(modelName: "Gen5") ?? {
                 let bot = Bot(modelName: "Gen5")!
                 Logger.logError("Using Gen5 as fallback bot")
                 return bot
@@ -84,7 +84,7 @@ struct BuyBotMainView: View {
     // 헤더 섹션
     private var headerSection: some View {
         VStack(spacing: 16) {
-            Image(selectedModel == "Gen6" ? "Gen6" : "Gen5")
+            Image(selectedModel == "Gen6" ? "\(bot1.model)" : "\(bot2.model)")
                 .resizable()
                 .scaledToFill()
                 .frame(height: 400)
@@ -94,7 +94,7 @@ struct BuyBotMainView: View {
                 .font(.system(size: 48, weight: .bold))
                 .foregroundColor(.white)
 
-            Text(selectedModel == "Gen6" ? "Send an advanced AI citizen to lead Mars' autonomous cities and secure your survival on Earth." : "Deploy a reliable AI resident to support Mars' growing civilization and ensure your war exemption.")
+            Text(selectedModel == "\(bot1.model)" ? "Send an advanced AI citizen to lead Mars' autonomous cities and secure your survival on Earth." : "Deploy a reliable AI resident to support Mars' growing civilization and ensure your war exemption.")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
@@ -111,11 +111,12 @@ struct BuyBotMainView: View {
                 .padding(.top, 32)
 
             Picker("Model", selection: $selectedModel) {
-                Text("Gen6").tag("Gen6")
-                Text("Gen5").tag("Gen5")
+                Text("\(bot1.model)").tag("\(bot1.model)")
+                Text("\(bot2.model)").tag("\(bot2.model)")
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 32)
+            .padding(.bottom, 24)
             .onChange(of: selectedModel) { oldValue, newValue in
                 Logger.logInfo("Model selected: \(newValue)")
             }
@@ -125,49 +126,45 @@ struct BuyBotMainView: View {
     // 기능 비교 섹션
     private var featureComparisonSection: some View {
         VStack(spacing: 24) {
-            Text("Why Deploy Optimus \(selectedModel)?")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.top, 32)
 
             // Gen6 기능
-            if selectedModel == "Gen6" {
+            if selectedModel == "\(bot1.model)" {
                 FeatureCard(
                     title: "Quantum AI Consciousness",
-                    description: "Self-evolving AI for leading autonomous city operations, managing infrastructure, and coordinating AI communities on Mars.",
+                    description: "Lead Mars' utopia with innovative social engagement and adaptive empathy.",
                     icon: "brain"
-                )
+                ).padding(.horizontal, 32)
                 FeatureCard(
                     title: "Advanced Dexterity",
-                    description: "22 DOF hands for precise tasks like assembling habitats and maintaining recharge stations in Martian cities.",
+                    description: "With \(bot1.physical.hand_dof) dof in their hands, \(bot1.model) robots can craft delicate art, perform complex musical compositions, and lead interactive cultural workshops.",
                     icon: "hand.raised"
-                )
+                ).padding(.horizontal, 32)
                 FeatureCard(
                     title: "Extended Operation",
-                    description: "72-hour autonomy with solar charging, optimized for continuous city management in Mars' harsh environment.",
+                    description: "\(bot1.hardware.batteryLife) autonomy with super fast charging, optimized for continuous city life in Mars' harsh environment.",
                     icon: "battery.100"
-                )
+                ).padding(.horizontal, 32)
             }
             // Gen5 기능
             else {
                 FeatureCard(
                     title: "Reliable AI Core",
-                    description: "Stable AI for supporting city operations, maintaining infrastructure, and assisting AI communities on Mars.",
+                    description: "Foster Martian community bonds through consistent and warm interactions.",
                     icon: "brain"
-                )
+                ).padding(.horizontal, 32)
                 FeatureCard(
                     title: "Functional Dexterity",
-                    description: "11 DOF hands for essential tasks like habitat maintenance and equipment setup in Martian cities.",
+                    description: "Equipped with \(bot2.physical.hand_dof) dof in their hands, \(bot2.model) robots thrive in Martian social life with expressive interactions by joining games, supporting group tasks, and share warm gestures.",
                     icon: "hand.raised"
-                )
+                ).padding(.horizontal, 32)
                 FeatureCard(
                     title: "Standard Operation",
-                    description: "24-hour autonomy with fast charging, suitable for ongoing support in Martian urban environments.",
+                    description: "\(bot2.hardware.batteryLife) autonomy with fast charging, suitable for ongoing support in Martian environments.",
                     icon: "battery.100"
-                )
+                ).padding(.horizontal, 32)
             }
         }
-        .padding(.horizontal, 32)
+        //.padding(.horizontal, 32)
     }
 
     // 사양 테이블 섹션
@@ -179,14 +176,13 @@ struct BuyBotMainView: View {
                 .padding(.top, 32)
 
             VStack(alignment: .leading, spacing: 12) {
-                specRow("Height", gen5: "5 ft 8 in (173 cm)", gen6: "5 ft 10 in (178 cm)")
-                specRow("Weight", gen5: "125 lb (57 kg)", gen6: "110 lb (50 kg)")
-                specRow("Payload", gen5: "45 lb (20 kg)", gen6: "60 lb (27 kg)")
-                specRow("Hand DOF", gen5: "11", gen6: "22")
-                specRow("Operation Duration", gen5: "24 hours", gen6: "72 hours")
-                specRow("AI Processing", gen5: "Standard Neural Net", gen6: "Quantum Neural Core")
-                specRow("City Roles", gen5: "Support, Maintenance", gen6: "Leadership, Autonomy")
-                specRow("Deployment Cost", gen5: "$30,000", gen6: "$50,000")
+                specRow(bot2, title: "Height", bot2: "\(bot2.physical.height)", bot1: "\(bot1.physical.height)")
+                specRow(bot2, title:"Weight", bot2: "\(bot2.physical.weight)", bot1: "\(bot1.physical.weight)")
+                specRow(bot2, title:"Payload", bot2: "\(bot2.physical.payload)", bot1: "\(bot2.physical.payload)")
+                specRow(bot2, title:"Hand DOF", bot2: "\(bot2.physical.hand_dof)", bot1: "\(bot1.physical.hand_dof)")
+                specRow(bot2, title:"Operation Duration", bot2: "\(bot2.hardware.batteryLife)", bot1: "\(bot1.hardware.batteryLife)")
+                specRow(bot2, title:"AI Processing", bot2: "\(bot2.hardware.cpu)", bot1: "\(bot1.hardware.cpu)")
+                specRow(bot2, title:"Deployment Cost", bot2: "\(bot2.price)", bot1: "\(bot1.price)")
             }
             .padding(.horizontal, 32)
         }
@@ -203,14 +199,14 @@ struct BuyBotMainView: View {
                     .font(.system(size: 18, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(selectedModel == "Gen6" ? Color.blue : Color.gray)
+                    .background(Color.blue)
                     .foregroundColor(.white)
                     .clipShape(Capsule())
             }
             .padding(.horizontal, 32)
             .padding(.top, 32)
 
-            Text("Expected Mars arrival: \(selectedModel == "Gen6" ? "Q3 2032" : "Q1 2036")")
+            Text("Expected Mars arrival: \(selectedModel == "\(bot2.model)" ? "\(bot2.estimatedDelivery)" : "\(bot1.estimatedDelivery)")")
                 .font(.system(size: 14))
                 .foregroundColor(.gray)
         }
@@ -249,13 +245,13 @@ struct BuyBotMainView: View {
     }
 
     // 사양 행 뷰
-    private func specRow(_ title: String, gen5: String, gen6: String) -> some View {
+    private func specRow(_ bot:Bot, title: String, bot2: String, bot1: String) -> some View {
         HStack {
             Text(title)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.white)
                 .frame(width: 120, alignment: .leading)
-            Text(selectedModel == "Gen6" ? gen6 : gen5)
+            Text(selectedModel == "(bot.model)" ? bot1 : bot2)
                 .font(.system(size: 16))
                 .foregroundColor(.gray)
             Spacer()
