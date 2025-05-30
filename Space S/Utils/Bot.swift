@@ -51,8 +51,8 @@ class Bot: ObservableObject {
     }
 
     @Published var model: String = ""
-    @Published var price: String = ""
-    @Published var shippingCost: String = ""
+    @Published var price: Int = 0
+    @Published var shippingCost: Int = 0
     @Published var estimatedDelivery: String = ""
     @Published var hardware: Hardware = Hardware(cpu: "", ram: "", batteryLife: "")
     @Published var features: Features = Features(sensors: [], aiCapabilities: "", mobility: "")
@@ -70,8 +70,8 @@ class Bot: ObservableObject {
         }
 
         self.model = modelDict["model"] as? String ?? ""
-        self.price = modelDict["price"] as? String ?? ""
-        self.shippingCost = modelDict["shipping_cost"] as? String ?? ""
+        self.price = modelDict["price"] as? Int ?? 0
+        self.shippingCost = modelDict["shipping_cost"] as? Int ?? 0
         self.estimatedDelivery = modelDict["estimatedDelivery"] as? String ?? ""
 
         if let hw = modelDict["hardware"] as? [String: String] {
@@ -104,7 +104,7 @@ class Bot: ObservableObject {
         self.warranty = modelDict["warranty"] as? String ?? ""
         
         // 모든 필수 필드가 비어있지 않은지 확인
-        guard !self.model.isEmpty && !self.price.isEmpty && !self.estimatedDelivery.isEmpty else {
+        guard !self.model.isEmpty && !(self.price == 0) && !self.estimatedDelivery.isEmpty else {
             Logger.logError("Bot specification for model \(modelName) is incomplete")
             return nil
         }

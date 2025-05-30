@@ -26,9 +26,10 @@
 import Foundation
 
 // 데이터 모델 정의
+
 struct Sponsorship: Identifiable, Codable {
     let name: String
-    let price: String
+    let price: Int
     let deliveryBenefit: String
     let speedUpDay: Int
     let dividend: String

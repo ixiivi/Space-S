@@ -4,9 +4,9 @@
 <array>
 	<dict>
 		<key>name</key>
-		<string>Robot Charging Station</string>
+		<string>Robo Charging Station</string>
 		<key>price</key>
-		<string>$5,000</string>
+		<integer>5000</integer>
 		<key>deliveryBenefit</key>
 		<string>10 days faster</string>
 		<key>speedUpDay</key>
@@ -18,9 +18,23 @@
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>Robot School</string>
+		<string>Robo Bar</string>
 		<key>price</key>
-		<string>$10,000</string>
+		<integer>5000</integer>
+		<key>deliveryBenefit</key>
+		<string>10 days faster</string>
+		<key>speedUpDay</key>
+		<integer>10</integer>
+		<key>dividend</key>
+		<string>0-1% dividend</string>
+		<key>id</key>
+		<string>bar</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Robo School</string>
+		<key>price</key>
+		<integer>5000</integer>
 		<key>deliveryBenefit</key>
 		<string>20 days faster</string>
 		<key>speedUpDay</key>
@@ -32,9 +46,9 @@
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>Robot Park</string>
+		<string>Robo Park</string>
 		<key>price</key>
-		<string>$15,000</string>
+		<integer>15000</integer>
 		<key>deliveryBenefit</key>
 		<string>1 month faster</string>
 		<key>speedUpDay</key>
@@ -46,9 +60,23 @@
 	</dict>
 	<dict>
 		<key>name</key>
+		<string>Robo Amphitheatre</string>
+		<key>price</key>
+		<integer>55000</integer>
+		<key>deliveryBenefit</key>
+		<string>2month faster</string>
+		<key>speedUpDay</key>
+		<integer>65</integer>
+		<key>dividend</key>
+		<string>1.6% dividend</string>
+		<key>id</key>
+		<string>amphitheatre</string>
+	</dict>
+	<dict>
+		<key>name</key>
 		<string>Mars Mining Development</string>
 		<key>price</key>
-		<string>$87,000</string>
+		<integer>87000</integer>
 		<key>deliveryBenefit</key>
 		<string>6 months faster</string>
 		<key>speedUpDay</key>
@@ -62,7 +90,7 @@
 		<key>name</key>
 		<string>Orbital Relay Station</string>
 		<key>price</key>
-		<string>$99,000</string>
+		<integer>99000</integer>
 		<key>deliveryBenefit</key>
 		<string>6 months faster</string>
 		<key>speedUpDay</key>
