@@ -7,9 +7,9 @@
 		<key>model</key>
 		<string>Gen5</string>
 		<key>price</key>
-		<string>40,000</string>
+		<integer>40000</integer>
 		<key>shipping_cost</key>
-		<string>15,000</string>
+		<integer>35000</integer>
 		<key>estimatedDelivery</key>
 		<string>January 2036</string>
 		<key>hardware</key>
@@ -55,17 +55,17 @@
 		<key>model</key>
 		<string>Gen6</string>
 		<key>price</key>
-		<string>60,000</string>
+		<integer>60000</integer>
 		<key>shipping_cost</key>
-		<string>17,000</string>
+		<integer>39000</integer>
 		<key>estimatedDelivery</key>
 		<string>July 2034</string>
 		<key>hardware</key>
 		<dict>
 			<key>cpu</key>
-			<string>Octa-Core AI Processor</string>
+			<string>Quantum Co-Processor</string>
 			<key>ram</key>
-			<string>32GB</string>
+			<string>1T</string>
 			<key>batteryLife</key>
 			<string>18 hours</string>
 		</dict>

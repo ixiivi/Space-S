@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct LoadingView: View {
+    //@Binding var path: [Route]
     @State private var progress: Double = 0.0
     @Binding var isLoadingComplete: Bool
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     
     var body: some View {
-        NavigationStack {
             GeometryReader { geometry in
                 ZStack {
                     Image("LoadingView_background")
@@ -42,15 +42,14 @@ struct LoadingView: View {
             .onAppear {
                 runAllAPIChecks()
             }
-            .navigationDestination(isPresented: $isLoadingComplete) {
-                LoginView()
-            }
             .alert("API Error", isPresented: $showErrorAlert) {
-                Button("OK") {}
+                Button("OK") {
+                    isLoadingComplete = true
+                }
             } message: {
                 Text(errorMessage)
             }
-        }
+        
     }
 
     func runAllAPIChecks() {
@@ -104,14 +103,15 @@ struct LoadingView: View {
     }
 }
 
-#Preview {
-    LoadingViewPreviewWrapper()
-}
-
-private struct LoadingViewPreviewWrapper: View {
-    @State private var isLoadingComplete = false
-
-    var body: some View {
-        LoadingView(isLoadingComplete: $isLoadingComplete)
-    }
-}
+//#Preview {
+//    @Previewable @State var previewPath: [Route] = []
+//    LoadingViewPreviewWrapper(path: previewPath)
+//}
+//
+//private struct LoadingViewPreviewWrapper: View {
+//    @State private var isLoadingComplete = false
+//    
+//    var body: some View {
+//        LoadingView(path: $path, isLoadingComplete: $isLoadingComplete)
+//    }
+//}

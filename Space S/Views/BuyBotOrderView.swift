@@ -8,32 +8,34 @@
 import SwiftUI
 
 public struct BuyBotOrderView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Binding var path: [Route]
+    @Bindable var currentUser: User
+    
     public let model: String
     @State private var showDelayInfo = false // For delay explanation popup
     @State private var showSponsorshipOptions = false // For sponsorship sheet
     @State private var sponsorshipSpeedup: Int? = nil // Tracks selected sponsorship speedup
+    @State private var sponsorshipPrice: Int? = nil
     @State private var newDelivery: String? = nil // New delivery date after sponsorship
+    @State private var totalPrice: Int? = nil
     @StateObject private var bot: Bot
     @StateObject private var sponsorList = OrderSponsorList()
     
-    public init(model: String) {
+    // Robot prices and shipping details
+    private var robotPrice: Int { bot.price }
+    private var shippingCost: Int { bot.shippingCost }
+    private var estimatedDelivery: String { bot.estimatedDelivery }
+    
+    init(path: Binding<[Route]>, currentUser: User, model: String) {
+        self._path = path
+        self._currentUser = Bindable(wrappedValue: currentUser)
         self.model = model
         // 기본 Bot  인스턴스 생성 (Gen6를 폴백으로 사용)
         let defaultBot = Bot(modelName: "Gen6")!
         _bot = StateObject(wrappedValue: Bot(modelName: model) ?? defaultBot)
     }
-    // Robot prices and shipping details
-    private var robotPrice: String { bot.price }
-    private var shippingCost: String { bot.shippingCost }
-    private var estimatedDelivery: String { bot.estimatedDelivery }
-//    private var totalPriceString: String {
-//            // Convert prices to Int, default to 0 if conversion fails
-//            let robotPriceInt = convertPriceToInt(robotPrice) ?? 0
-//            let shippingCostInt = convertPriceToInt(shippingCost) ?? 0
-//            // Sum and format as string with "$"
-//            let total = robotPriceInt + shippingCostInt
-//            return "\(total)"
-//        }
+    
 
     public var body: some View {
         ZStack {
@@ -46,7 +48,8 @@ public struct BuyBotOrderView: View {
                         Image(model)
                             .resizable()
                             .scaledToFill()
-                            .frame(height: 300)
+                            //.frame(height: .infinity)
+                            .frame(maxWidth: .infinity)
                             .clipped()
                         Text("Optimus \(model)")
                             .font(.system(size: 36, weight: .bold))
@@ -57,65 +60,89 @@ public struct BuyBotOrderView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                     }
-
-                    // Robot price and details
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Order Summary")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.white)
-                        infoRow("Model", value: "Optimus \(model)")
-                        infoRow("Price", value: "$" + robotPrice)
-                    }
-                    .padding(.horizontal, 32)
-                    .padding(.top, 32)
-
-                    // Shipping information
-                    VStack(alignment: .leading, spacing: 16) {
-//                        Text("Shipping Information")
-//                            .font(.system(size: 24, weight: .bold))
-//                            .foregroundColor(.white)
-                        infoRow("Shipping Cost", value: "$" + shippingCost)
-                        if let newDelivery = newDelivery, let sponsorshipSpeedup = sponsorshipSpeedup {
-                            HStack {
-                                Text("Estimated Delivery")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .frame(width: 150, alignment: .leading)
-                                VStack{
-                                    Text(estimatedDelivery)
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.gray)
-                                        .strikethrough(true, color: .red)
-                                    Text("\(newDelivery)")
-                                        .font(.system(size: 16))
+                    VStack(alignment:.center, spacing: 0){
+                        // Robot price and details
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Order Summary")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: 400, alignment: .leading)
+                            infoRow("Model", value: "Optimus \(model)")
+                            infoRow("Price", value: "$\(robotPrice)")
+                        }
+                        .padding(.horizontal, 32)
+                        .padding(.top, 32)
+                        .frame(maxWidth: 400, alignment: .leading)
+                        
+                        
+                        // Shipping information
+                        VStack(alignment: .leading, spacing: 16) {
+                            infoRow("Shipping Cost", value: "$\(shippingCost)")
+                            if sponsorshipSpeedup == nil {
+                                infoRow("Estimated Delivery", value: estimatedDelivery)
+                                
+                            } else {
+                                //infoRow("Estimated Delivery", value: estimatedDelivery)
+                                HStack {
+                                    Text("Estimated Delivery")
+                                        .font(.system(size: 16, weight: .medium))
                                         .foregroundColor(.white)
-                                    Spacer()
+                                        .frame(width: 150, alignment: .leading)
+                                    VStack{
+                                        Text(estimatedDelivery)
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.gray)
+                                            .strikethrough(true, color: .red)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        Text("\(newDelivery ?? "error")")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        Spacer()
+                                    }
                                 }
                             }
-                        } else {
-                            infoRow("Estimated Delivery", value: estimatedDelivery)
+                            HStack {
+                                Text("Why does it take so long?")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.gray)
+                                Button(action: { showDelayInfo = true }) {
+                                    Image(systemName: "questionmark.circle")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            
                         }
-                        HStack {
-                            Text("Why does it take so long?")
-                                .font(.system(size: 16))
-                                .foregroundColor(.gray)
-                            Button(action: { showDelayInfo = true }) {
-                                Image(systemName: "questionmark.circle")
-                                    .foregroundColor(.blue)
+                        .padding(.horizontal, 32)
+                        .padding(.top, 32)
+                        .frame(maxWidth: 400, alignment: .leading)
+                        
+                        //Total Cost
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack{
+                                infoRow(
+                                    "Total", value: "$\(totalPrice ?? 0)"
+                                )
+                            }
+                            .padding()
+                            .background(Color.black.opacity(0.8))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                            .onAppear {
+                                totalPrice = calculateTotalPrice()
                             }
                         }
+                        .padding(.horizontal, 32)
+                        .padding(.top, 32)
+                        .frame(maxWidth: 400, alignment: .leading)
+                        
+                    
+                        
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.top, 32)
-                    
-                    
-                    // Total Cost
-//                    let total = convertPriceToInt(robotPrice) + convertPriceToInt(shippingCost)
-//                    VStack(alignment: .leading, spacing: 16) {
-//                        infoRow("Total", value: "$" + "\(total)")
-//                    }
-//                    .padding(.horizontal, 32)
-//                    .padding(.top, 32)
+                    .frame(maxWidth: .infinity, alignment: .center)
                     
 
                     // Expedite delivery option
@@ -127,7 +154,7 @@ public struct BuyBotOrderView: View {
                         Button(action: { showSponsorshipOptions = true }) {
                             Text("Support Mars Projects")
                                 .font(.system(size: 16, weight: .bold))
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth:400)
                                 .padding()
                                 .background(sponsorshipSpeedup == nil ? Color.blue : Color.gray)
                                 .foregroundColor(.white)
@@ -136,16 +163,14 @@ public struct BuyBotOrderView: View {
                         .padding(.horizontal, 32)
                         
                         Button(action: {
-                            // Proceed without sponsoring
-                            Logger.logInfo("User chose to launch without sponsoring")
-                            // No change to delivery time
+                            completeOrderAndNavigate()
                         }) {
                             Text(sponsorshipSpeedup == nil ? "proceed without sponsoring" : "Checkout")
                                 .font(.system(size: 16, weight: .bold))
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: 400)
                                 .padding()
-                                .background(sponsorshipSpeedup == nil ? Color.gray : Color.blue)
-                                .foregroundColor(.white)
+                                .background(sponsorshipSpeedup == nil ? Color.black : Color.blue)
+                                .foregroundColor(sponsorshipSpeedup == nil ? Color.gray : Color.white)
                                 .clipShape(Capsule())
                         }
                         .padding(.horizontal, 32)
@@ -159,11 +184,14 @@ public struct BuyBotOrderView: View {
         .navigationTitle("Place Order")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showSponsorshipOptions) {
-            SponsorshipOptionsView(model: model, onSponsor: { speedup in
+            SponsorshipOptionsView(model: model, onSponsor: { speedup , price in
                 sponsorshipSpeedup = speedup
+                sponsorshipPrice = price
                 newDelivery = calculateNewDelivery(speedup: speedup)
+                totalPrice = calculateTotalPrice(price: price)
             })
         }
+
         .alert(isPresented: $showDelayInfo) {
             Alert(
                 title: Text("Why the Delay?"),
@@ -173,7 +201,40 @@ public struct BuyBotOrderView: View {
         }
     }
 
-    // Helper for info rows
+
+    private func completeOrderAndNavigate() {
+        // 1. currentUser에 선택된 봇 모델명 저장
+        currentUser.selectedBot = self.model
+        Logger.logInfo("Order Completion: Bot model '\(self.model)' set for user '\(currentUser.name)'.")
+
+        // 2. 스폰서십 정보 저장 (선택적)
+        if let spPrice = sponsorshipPrice, spPrice > 0, let spSpeedup = sponsorshipSpeedup {
+            // 예시: 스폰서 이름을 저장하거나, 스폰서십 적용 여부 플래그를 설정
+            // User 모델에 'sponsorDetails: String?' 같은 필드가 있다고 가정
+            // currentUser.sponsor = "Sponsored: \(spSpeedup) days faster for $\(spPrice)"
+            // 또는 현재 User 모델의 sponsor: String? 필드 활용
+            let selectedSponsor = sponsorList.sponsors.first { $0.price == spPrice && $0.speedUpDay == spSpeedup }
+            currentUser.sponsor = selectedSponsor?.name ?? "Custom Sponsorship (\(spPrice))" // 스폰서 이름 저장
+            Logger.logInfo("Order Completion: Sponsorship '\(currentUser.sponsor ?? "N/A")' applied.")
+        } else {
+            currentUser.sponsor = nil // 스폰서십 없음
+            Logger.logInfo("Order Completion: No sponsorship applied.")
+        }
+        
+        // 3. SwiftData에 변경사항 저장
+        do {
+            try modelContext.save()
+            Logger.logInfo("Order Completion: User data saved successfully for user '\(currentUser.name)'.")
+        } catch {
+            Logger.logError("Order Completion: Failed to save user data. Error: \(error.localizedDescription)")
+            // 사용자에게 저장 실패 알림을 표시할 수 있습니다. (선택적)
+            // 이 단계에서 저장 실패 시 주문 완료 화면으로 넘어가지 않도록 처리할 수도 있습니다.
+        }
+
+        // 4. OrderCompleteView로 네비게이션
+        path.append(.orderComplete(user: self.currentUser))
+    }
+    
     private func infoRow(_ title: String, value: String) -> some View {
         HStack {
             Text(title)
@@ -207,20 +268,18 @@ public struct BuyBotOrderView: View {
         }
         return estimatedDelivery // Fallback
     }
-    
-    func convertPriceToInt(_ priceString: String) -> Int? {
-        // "$" 제거하고 숫자만 남김
-        let cleanString = priceString.replacingOccurrences(of: "$", with: "")
-        // Int로 변환
-        return Int(cleanString)
+    private func calculateTotalPrice(price: Int = 0) -> Int {
+        let SponsorPrice = price
+        return bot.price + bot.shippingCost + SponsorPrice
     }
+
 }
 
     
 // SponsorshipOptionsView
 struct SponsorshipOptionsView: View {
     let model: String
-    let onSponsor: (Int) -> Void
+    let onSponsor: (Int, Int) -> Void
     @StateObject private var sponsorList = OrderSponsorList()
     @Environment(\.dismiss) private var dismiss
 
@@ -238,77 +297,74 @@ struct SponsorshipOptionsView: View {
     }
     
     var body: some View {
-            NavigationStack {
-                ZStack {
-                    Color.black.ignoresSafeArea()
-                    ScrollView {
-                        VStack(spacing: 16) {
-//                            Text("Support Mars Projects")
-//                                .font(.system(size: 28, weight: .bold))
-//                                .foregroundColor(.white)
-//                                .padding(.top, 32)
-                            Text("Sponsor these projects to speed up your delivery and earn dividends.")
+        NavigationStack {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                ScrollView {
+                    VStack(spacing: 16) {
+                        Text("Sponsor these projects to speed up your delivery and earn dividends.")
+                            .font(.system(size: 16))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                        if sponsorships.isEmpty {
+                            Text("No sponsorship options available")
                                 .font(.system(size: 16))
-                                .foregroundColor(.gray)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
-                            if sponsorships.isEmpty {
-                                Text("No sponsorship options available")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.red)
-                                    .padding(.top, 16)
-                            } else {
-                                ForEach(sponsorships, id: \.id) { option in
-                                    SponsorshipCard(
-                                        title: option.name,
-                                        cost: option.price,
-                                        speedup: option.deliveryBenefit,
-                                        dividend: option.dividend,
-                                        imageName: option.id,
-                                        onSponsor: {
-                                            onSponsor(option.speedUpDay)
-                                            dismiss()
-                                        }
-                                    )
-                                    
-                                }
+                                .foregroundColor(.red)
+                                .padding(.top, 16)
+                        } else {
+                            ForEach(sponsorships, id: \.id) { option in
+                                SponsorshipCard(
+                                    title: option.name,
+                                    cost: option.price,
+                                    speedup: option.deliveryBenefit,
+                                    dividend: option.dividend,
+                                    imageName: option.id,
+                                    onSponsor: {
+                                        onSponsor(option.speedUpDay, option.price)
+                                        dismiss()
+                                    }
+                                )
+                                
                             }
                         }
-                        .padding(.bottom, 32)
-                        Button(action: {
-                            // Proceed without sponsoring
-                            Logger.logInfo("User chose to launch without sponsoring")
-                            onSponsor(0)
-                            dismiss()
-                        }) {
+                    }
+                    .padding(.bottom, 32)
+                    Button(action: {
+                        // Proceed without sponsoring
+                        Logger.logInfo("User chose to launch without sponsoring")
+                        onSponsor(0, 0)
+                        dismiss()
+                    }) {
                         Text("proceed without sponsoring")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                             .underline()
-                        }
                     }
                 }
-                .preferredColorScheme(.dark)
-                .navigationTitle("Support Mars Project")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.white)
-                        }
+            }
+            .preferredColorScheme(.dark)
+            .navigationTitle("Support Mars Project")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.white)
                     }
                 }
-                .onAppear {
-                    print("Sponsors count: \(sponsorList.sponsors.count)")
-                }
+            }
+            .onAppear {
+                print("Sponsors count: \(sponsorList.sponsors.count)")
             }
         }
     }
+}
+
 
     // SponsorshipCard
     struct SponsorshipCard: View {
         let title: String
-        let cost: String
+        let cost: Int
         let speedup: String
         let dividend: String
         let imageName: String
@@ -332,7 +388,7 @@ struct SponsorshipOptionsView: View {
                 Text(title)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
-                Text("Cost: \(cost)")
+                Text("Cost: $\(cost)")
                     .font(.system(size: 14))
                     .foregroundColor(.gray)
                 Text("Speed Up: \(speedup)")
@@ -362,34 +418,6 @@ struct SponsorshipOptionsView: View {
         }
     }
 
-    // SponsorListView
-    struct SponsorListView: View {
-        @StateObject private var sponsorList = OrderSponsorList()
-
-        var body: some View {
-            List(sponsorList.sponsors) { sponsor in
-                VStack(alignment: .leading) {
-                    Text(sponsor.name)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text("Price: \(sponsor.price)")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Text("Delivery: \(sponsor.deliveryBenefit)")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Text("Dividend: \(sponsor.dividend)")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-                .padding(.vertical, 4)
-            }
-            .preferredColorScheme(.dark)
-            .background(Color.black.ignoresSafeArea())
-        }
-    }
-
-    // Preview
-#Preview {
-    BuyBotOrderView(model: "Gen6")
-}
+//#Preview {
+//    BuyBotOrderView(model: "Gen6")
+//}

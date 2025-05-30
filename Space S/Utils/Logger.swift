@@ -13,7 +13,7 @@
 //**터미널에서 log 폴더 찾기
 //1. xcrun simctl list devices
 //2. 디바이스 ID 확인
-//3.find ~/Library/Developer/CoreSimulator/Devices/<실제DeviceID>/data/Containers/Data/Application -name "app.log" 
+//3.find ~/Library/Developer/CoreSimulator/Devices/<실제DeviceID>/data/Containers/Data/Application -name "app.log"
 
 
 import Foundation
