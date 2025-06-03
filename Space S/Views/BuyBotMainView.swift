@@ -203,7 +203,7 @@ struct BuyBotMainView: View {
                     ).padding(.horizontal, 32).padding(.top, 16)
                     SpecCard(
                         title: "Price",
-                        description: "$\(bot2.price)"
+                        description: "$\(bot1.price)"
                     ).padding(.horizontal, 32).padding(.top, 16)
                 }
                 // Gen5 기능
