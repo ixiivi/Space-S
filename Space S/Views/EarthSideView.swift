@@ -111,6 +111,7 @@ struct EarthSideView: View {
 }
 
 struct EarthHomeContentView: View {
+    @State private var launchDate: Date? = nil
     @Bindable var user: User
     let totalEarthUsersSendingRobots = 11095
 
@@ -128,10 +129,33 @@ struct EarthHomeContentView: View {
                     iconColor: .orange
                 ) {
                     HStack(spacing: 12) {
-                        StatusInfoBox(
-                            title: "Shipment Status",
-                            value: user.productionStatus ?? "Ongoing Production"
-                        )
+
+                        // Shipment Status Box
+                        VStack(spacing: 4) {
+                            Text("Shipment Status")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            Text(user.productionStatus ?? "Ongoing Production")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            if let launchDate = launchDate {
+                                Text("Launch scheduled for \(launchDate.formatted(.dateTime.month().day()))")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 100)
+                        .padding(12)
+                        .background(Color(.systemGray5))
+                        .cornerRadius(10)
                         
                         StatusInfoBox(
                             title: "Queue Number",
@@ -166,7 +190,10 @@ struct EarthHomeContentView: View {
             }
             .padding()
         }
-        .background(Color.white) // ScrollView 배경도 흰색으로 명시
+        .onAppear {
+            launchDate = LaunchScheduleLoader.loadLaunchDate()
+        }
+        .background(Color.white)
     }
 }
 
