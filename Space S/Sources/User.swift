@@ -15,7 +15,7 @@ class User {
     
     public var selectedBot: String?
     public var sponsor: String?
-    public var waitList: Int = 9999999
+    public var waitList: Int = 8392119
     
     var productionStatus: String?             // 예: "대기중", "생산중", "조립완료", "품질검사중", "생산완료"
     var estimatedProductionCompleteDate: Date? // 예상 생산 완료일

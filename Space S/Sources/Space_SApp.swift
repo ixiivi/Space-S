@@ -51,7 +51,7 @@ struct AppView: View {
                 case .selectDestination(let user):
                     SelectEarthMarsView(path: $path, user: user)
                 case .earthSideView(let user): // ◀ --- 추가된 케이스 처리
-                    EarthSideView(path: $path, user: user) // 실제 뷰로 교체 예정
+                    EarthSideView(path: $path, user: user, logoutAction: logoutAndResetApp) // 실제 뷰로 교체 예정
                     //Text("Earth Side View for \(user.name)") // 임시 텍스트
                 case .marsSideView(let user):  // ◀ --- 추가된 케이스 처리
                     MarsSideView(path: $path, user: user) // 실제 뷰로 교체 예정
@@ -64,6 +64,14 @@ struct AppView: View {
             }
         }
     }
+    func logoutAndResetApp() {
+            // User 데이터 삭제는 MenuView에서 modelContext를 사용해 직접 처리합니다.
+            // 여기서는 네비게이션 경로를 초기화하고 로딩 상태를 false로 되돌립니다.
+            path.removeAll()
+            isLoadingComplete = false
+            // LoadingView의 onAppear 로직에 따라 일정 시간 후 isLoadingComplete가 true로 바뀌고,
+            // users 쿼리가 빈 상태이므로 LoginView가 표시될 것입니다.
+        }
 }
 
 @main

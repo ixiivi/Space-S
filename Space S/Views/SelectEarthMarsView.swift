@@ -12,20 +12,21 @@ struct SelectEarthMarsView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemGroupedBackground).ignoresSafeArea()
+            Color.white.ignoresSafeArea()
+            //Color(.systemGroupedBackground).ignoresSafeArea()
 
             VStack(spacing: 32) {
 
-                Text("Welcome, \(user.name)!                          Choose Your Perspective")
+                Text("Welcome, \(user.name)!")
                     .font(.system(size: 28, weight: .semibold))
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
 
-                Text("View details for your Optimus \(user.selectedBot ?? "Bot")'s journey.")
-                    .font(.system(size: 16))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+//                Text("View details for your Optimus \(user.selectedBot ?? "Bot")'s journey.")
+//                    .font(.system(size: 16))
+//                    .foregroundColor(.gray)
+//                    .multilineTextAlignment(.center)
+//                    .padding(.horizontal, 24)
 
                 perspectiveButton(
                     perspectiveName: "Earth",
@@ -49,8 +50,9 @@ struct SelectEarthMarsView: View {
             }
             .padding(.vertical, 40)
         }
+        .environment(\.colorScheme, .light)
         .navigationBarBackButtonHidden(true)
-        .navigationTitle("Journey Perspective")
+        .navigationTitle("Select Planet")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             Logger.logInfo("SelectEarthMarsView appeared for user: \(user.name)")
@@ -70,13 +72,13 @@ struct SelectEarthMarsView: View {
                     .font(.system(size: 40))
                     .foregroundColor(iconColor)
 
-                Text("\(perspectiveName) Perspective")
+                Text("\(perspectiveName)")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
 
                 Text(description)
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
             }
