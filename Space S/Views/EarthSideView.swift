@@ -104,6 +104,7 @@ struct EarthSideView: View {
 }
 
 struct EarthHomeContentView: View {
+    @State private var launchDate: Date? = nil
     @Bindable var user: User
     let totalEarthUsersSendingRobots = 12345
 
@@ -133,6 +134,13 @@ struct EarthHomeContentView: View {
                                 .foregroundColor(.primary)
                                 .multilineTextAlignment(.center)
                                 .fixedSize(horizontal: false, vertical: true)
+                            
+                            if let launchDate = launchDate {
+                                Text("Launch scheduled for \(launchDate.formatted(.dateTime.month().day()))")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                                    .multilineTextAlignment(.center)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 100)
@@ -201,6 +209,9 @@ struct EarthHomeContentView: View {
                 }
             }
             .padding()
+        }
+        .onAppear {
+            launchDate = LaunchScheduleLoader.loadLaunchDate()
         }
     }
 }
