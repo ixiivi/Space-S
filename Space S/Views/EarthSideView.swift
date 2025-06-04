@@ -82,8 +82,7 @@ struct EarthSideView: View {
         .navigationBarHidden(true) // SwiftUI 네비게이션 바 숨김 (커스텀 바 사용)
         .onAppear{
             Logger.logInfo("EarthSideView appeared for user: \(user.name)")
-        }
-    }
+    
     
     // 상단 네비게이션 바 (커스텀)
     @ViewBuilder
@@ -144,7 +143,6 @@ struct EarthSideView: View {
         .padding(.bottom, UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 10)
         .background(Color.white.shadow(color: .black.opacity(0.05), radius: 2, y: -2))
     }
-}
     
     // --- 홈 탭에 표시될 콘텐츠 뷰 ---
     struct EarthHomeContentView: View {
@@ -179,6 +177,7 @@ struct EarthSideView: View {
                         }
                     }
                     
+
                     // 2. 스폰서십 정보 카드 (스폰서 정보가 있을 경우)
                     if let sponsorName = user.sponsor, !sponsorName.isEmpty {
                         StatusCardView(
