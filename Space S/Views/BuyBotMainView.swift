@@ -294,12 +294,12 @@ struct BuyBotMainView: View {
     private func calculateAndUpdateEstimatedArrival() {
         // 1. 활동 정의 (사용자 데이터 및 선택된 모델 기반)
         // user.waitList가 0이면 생산 대기 시간도 0이 되도록 처리
-        let productionWaitDuration = user.waitList > 0 ? max(1, Int(round(Double(user.waitList) / 5000.0))) : 0
+        let productionWaitDuration = user.waitList > 0 ? max(1, Int(round(Double(user.waitList) / round(Double(user.productionCapacity))))) : 0
         
         let activities: [CPMActivity] = [
             // "A"라는 시작점이 없으므로, 첫 활동의 predecessors는 비워둡니다.
             CPMActivity(id: "B", name: "로봇 생산 대기", duration: productionWaitDuration, predecessors: []),
-            CPMActivity(id: "C", name: "로봇 생산", duration: 2, predecessors: ["B"]),
+            CPMActivity(id: "C", name: "로봇 생산", duration: user.productionDurationInDays, predecessors: ["B"]),
             CPMActivity(id: "D", name: "로봇 캘리브레이션 (지구)", duration: 1, predecessors: ["C"]),
             CPMActivity(id: "E", name: "발사장 운송", duration: 3, predecessors: ["D"]),
             CPMActivity(id: "F", name: "발사 대기", duration: 20, predecessors: ["E"]),
@@ -431,33 +431,3 @@ private struct SpecCard: View {
         .background(Color.black.opacity(0.8))
     }
 }
-//
-//
-//// 사양 행 뷰 (SpecCard 내부 패딩 조정)
-//private struct SpecCard: View {
-//    let title: String
-//    let description: String
-//    
-//    var body: some View {
-//        HStack(spacing: 16) { // VStack 제거하고 HStack으로 변경
-//            Text(title)
-//                .font(.system(size: 16, weight: .medium))
-//                .foregroundColor(.white)
-//                .frame(width: 120, alignment: .leading) // 너비 고정 및 정렬
-//            Text(description)
-//                .font(.system(size: 16))
-//                .foregroundColor(.gray)
-//            Spacer() // 오른쪽으로 밀착
-//        }
-//        .padding(.horizontal) // 좌우 패딩 추가
-//        .padding(.vertical, 8) // 상하 패딩 추가 (줄 간격 역할)
-//        // .frame(maxWidth: .infinity, alignment: .leading) // HStack에 이미 적용됨
-//        // .background(Color.black.opacity(0.8)) // 부모 VStack에서 배경 설정
-//    }
-//}
-
-
-//
-//#Preview {
-//    BuyBotMainView(path: .constant([Route.buyBot]))
-//}

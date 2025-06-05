@@ -3,17 +3,19 @@
 //  Space S
 //
 //  Created by 김재현 on 5/29/25.
-// 이 파일
+//
 
 import SwiftUI
 import SwiftData
+import CoreLocation
+import WebKit
 
 struct EarthSideView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var user: User
     @Binding var path: [Route]
     @State private var selectedTab: EarthTab = .home
-    let logoutAction: () -> Void // 로그아웃 액션 클로저 추가
+    let logoutAction: () -> Void
     
     enum EarthTab: CaseIterable, Identifiable {
         case home, cpm, changeView, explore, menu
@@ -23,18 +25,18 @@ struct EarthSideView: View {
             switch self {
             case .home: "house"
             case .cpm: "calendar"
-            case .changeView: "plus.circle"
+            case .changeView: "stop"
             case .explore: "magnifyingglass"
             case .menu: "line.horizontal.3"
             }
         }
         var title: String {
             switch self {
-            case .home: "Home"
-            case .cpm: "CPM"
-            case .changeView: "Perspective"
-            case .explore: "Search"
-            case .menu: "Menu"
+            case .home: ""
+            case .cpm: ""
+            case .changeView: ""
+            case .explore: ""
+            case .menu: ""
             }
         }
     }
@@ -54,10 +56,14 @@ struct EarthSideView: View {
                     .tag(EarthTab.home)
                 CPMView(user: user)
                     .tag(EarthTab.cpm)
-                Text("Search").tag(EarthTab.explore)
-                Text("Menu").tag(EarthTab.menu)
+                //SearchView()
+                //    .tag(EarthTab.explore)
+                //Text("Search").tag(EarthTab.explore)
                 
-                //MenuView(user: user, path: $path, logoutAction: logoutAction)
+                EarthSearchView()
+                    .tag(EarthTab.explore)
+                
+                MenuView(user: user, modelContext: modelContext, logoutAction: logoutAction)
                     .tag(EarthTab.menu)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -66,22 +72,22 @@ struct EarthSideView: View {
             
             minimalistTabBar()
         }
-        .background(Color.white) // 전체 배경을 흰색으로 명시
+        .background(Color.white)
         .ignoresSafeArea(.keyboard)
         .navigationBarHidden(true)
-        .environment(\.colorScheme, .light) // 루트 뷰에 라이트 모드 환경 강제
+        .environment(\.colorScheme, .light)
     }
     
     private func minimalistTopBar() -> some View {
         HStack {
             Text("Earth")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(Color(UIColor.label)) // 라이트 모드에 맞는 기본 텍스트 색상
+                .foregroundColor(Color(UIColor.label))
             Spacer()
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
-        .background(Color(UIColor.systemGray6)) // 명시적인 밝은 배경색
+        .background(Color(UIColor.systemGray6))
     }
     
     private func minimalistTabBar() -> some View {
@@ -97,18 +103,18 @@ struct EarthSideView: View {
                     VStack(spacing: 4) {
                         Image(systemName: tab.iconName)
                             .font(.system(size: 22))
-                            .foregroundColor(selectedTab == tab ? Color.accentColor : Color(UIColor.darkGray)) // 비활성 시 명시적 어두운 회색
+                            .foregroundColor(selectedTab == tab ? Color.accentColor : Color(UIColor.darkGray))
                         Text(tab.title)
                             .font(.caption2)
-                            .foregroundColor(selectedTab == tab ? Color.accentColor : Color(UIColor.darkGray)) // 비활성 시 명시적 어두운 회색
+                            .foregroundColor(selectedTab == tab ? Color.accentColor : Color(UIColor.darkGray))
                     }
                     .frame(maxWidth: .infinity)
                 }
             }
         }
         .padding(.top, 8)
-        .padding(.bottom, UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 8) // Safe area 존중
-        .background(Color(UIColor.systemGray6)) // 명시적인 밝은 배경색
+        .padding(.bottom, 8)
+        .background(Color(UIColor.systemGray6))
     }
 }
 
@@ -116,15 +122,12 @@ struct EarthHomeContentView: View {
     @State private var launchDate: Date? = nil
     @Bindable var user: User
     let totalEarthUsersSendingRobots = 11095
-    //@StateObject var locationManager = LocationManager()
-    @State var openWeatherResponse : OpenWeatherResponse?// 현재 날씨 데이터
-    @State var oneCallWeatherResponse: OneCallResponse?  // 주간 예보 포함 전체 응답 (daily 추출용)
-    @State var isLoadingWeather: Bool = false
-    @State var weatherError: Error? = nil
-    var weatherDataDownload = WeatherDataDownload()
-    @StateObject var locationManager = LocationManager()
-    private let austinLatitude: Double = 30.2672
-    private let austinLongitude: Double = -97.7431
+    
+    @State private var forecast: ForecastResponse?
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    
+    let downloader = WeatherDataDownload()
     
     var body: some View {
         ScrollView {
@@ -132,7 +135,7 @@ struct EarthHomeContentView: View {
                 Text("Hello, \(user.name)!")
                     .font(.headline)
                     .padding(.horizontal)
-                    .foregroundColor(Color(UIColor.label)) // 라이트 모드에 적합한 텍스트 색상
+                    .foregroundColor(Color(UIColor.label))
                 
                 StatusCardView(
                     title: "My Optimus \(user.selectedBot ?? "Bot") Journey",
@@ -140,14 +143,14 @@ struct EarthHomeContentView: View {
                     iconColor: .orange
                 ) {
                     HStack(spacing: 12) {
-
-                        // Shipment Status Box
+                        
                         VStack(spacing: 4) {
-                            Text("Shipment Status")
+                            Text("Status")
                                 .font(.footnote)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Color(UIColor.secondaryLabel))
                                 .multilineTextAlignment(.center)
-                            Text(user.productionStatus ?? "Ongoing Production")
+                                
+                            Text(user.productionStatus ?? "???")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
@@ -164,16 +167,37 @@ struct EarthHomeContentView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 100)
                         .padding(12)
-                        .background(Color(.systemGray5))
+                        .background(Color(.systemGray6))
                         .cornerRadius(10)
                         
-                        StatusInfoBox(
-                            title: "Queue Number",
-                            value: "\(user.waitList)"
-                        )
+                        // launchStatus 값에 따라 다른 정보 표시
+                        if let status = user.productionStatus {
+                            if status == "Before Production" {
+                                StatusInfoBox(
+                                    title: "Queue",
+                                    value: "\(user.waitList)"
+                                )
+                            } else if status == "Ongoing Production" {
+                                StatusInfoBox(
+                                    title: "Production",
+                                    value: "\(productionProgressPercentage()) %"
+                                )
+                            } else {
+                                StatusInfoBox(
+                                    title: "???",
+                                    value: "-"
+                                )
+                            }
+                        } else {
+                            StatusInfoBox(
+                                title: "???",
+                                value: "-"
+                            )
+                        }
+                        
                         
                         StatusInfoBox(
-                            title: "Expected Arrival",
+                            title: "Arrival exp",
                             value: user.estimatedArrivalAtMarsDate?
                                 .formatted(.dateTime.month().day().year()) ?? "Yet to Launch"
                         )
@@ -183,7 +207,7 @@ struct EarthHomeContentView: View {
                 if let sponsor = user.sponsor, !sponsor.isEmpty {
                     StatusCardView(
                         title: "Sponsorship Info",
-                        iconName: "gift.fill",
+                        iconName: "gift",
                         iconColor: .green
                     ) {
                         InfoRow(label: "Project Type", value: sponsor)
@@ -195,60 +219,24 @@ struct EarthHomeContentView: View {
                     iconName: "globe.americas",
                     iconColor: .blue
                 ) {
-                    InfoRow(label: "Robot Production Capacity", value: "5000 units/day")
+                    InfoRow(label: "Robot Production Capacity", value: "\(user.productionCapacity) units/day")
+                    InfoRow(label: "Required Manufacturing Time", value: "\(user.productionDurationInDays) days")
                 }
                 
                 StatusCardView(
-                    title: "Starbase, Texas Weather",
+                    title: "Starbase Weather",
                     iconName: "sun.max",
                     iconColor: .yellow
                 ) {
-                    VStack(alignment: .leading, spacing: 10) { // 날씨 정보를 담을 VStack
-                        if isLoadingWeather {
-                            ProgressView("날씨 정보 로딩 중...")
-                                .padding()
-                        } else if let error = weatherError {
-                            Text("날씨 정보를 가져오지 못했습니다: \(error.localizedDescription)")
-                                .font(.caption)
-                                .foregroundColor(.red)
-                                .padding()
+                    VStack(alignment: .leading, spacing: 10) {
+                        if isLoading {
+                            ProgressView("Loading...")
+                        } else if let forecast = forecast {
+                            WeatherView(forecast: forecast)
+                        } else if let errorMessage = errorMessage {
+                            Text("Error: \(errorMessage)").foregroundColor(.red)
                         } else {
-                            // 현재 날씨 표시
-                            if let currentWeatherData = openWeatherResponse {
-                                Text("현재 날씨")
-                                    .font(.headline)
-                                // WeatherView를 사용하거나 직접 UI 구성
-                                WeatherView(openWeatherResponse: currentWeatherData)
-                                    .padding(.bottom)
-                            } else {
-                                Text("현재 날씨 정보를 불러올 수 없습니다.")
-                                    .font(.caption)
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 5)
-                            
-                            // 주간 예보 표시
-                            if let dailyForecasts = oneCallWeatherResponse?.daily, !dailyForecasts.isEmpty {
-                                Text("주간 예보")
-                                    .font(.headline)
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 15) {
-                                        ForEach(dailyForecasts.prefix(7)) { dayForecast in // 최대 7일치 표시
-                                            DailyWeatherCell(
-                                                forecast: FormattedDailyForecast(
-                                                    dailyForecast: dayForecast,
-                                                    timezoneIdentifier: oneCallWeatherResponse?.timezone // OneCall 응답의 시간대 정보 사용
-                                                )
-                                            )
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                }
-                            } else {
-                                Text("주간 예보 정보를 불러올 수 없습니다.")
-                                    .font(.caption)
-                            }
+                            Text("Tap to load weather")
                         }
                     }
                 }
@@ -258,380 +246,575 @@ struct EarthHomeContentView: View {
             .padding()
         }
         .onAppear {
-
-            //launchDate = LaunchScheduleLoader.loadLaunchDate()
-
+            Task {
+                await loadForecast()
+            }
         }
         .background(Color.white)
     }
-}
-
-struct DailyWeatherCell: View {
-    let forecast: FormattedDailyForecast
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Text(forecast.dayOfWeek) // 예: "월"
-                .font(.caption.weight(.medium))
-            if let iconURL = forecast.iconURL {
-                 AsyncImage(url: iconURL) { image in
-                     image.resizable()
-                 } placeholder: {
-                     ProgressView()
-                 }
-                 .frame(width: 40, height: 40)
-            } else {
-                Text(forecast.weatherCondition.first?.description.uppercased() ?? "?") // 아이콘 대신 텍스트 (예: "☀️")
-                     .font(.title2)
-            }
-            Text("\(forecast.tempMaxCelsius ?? 0)°")
-                .font(.body.weight(.semibold))
-            Text("\(forecast.tempMinCelsius ?? 0)°")
-                .font(.caption)
-                .foregroundColor(.gray)
+    
+    private func productionProgressPercentage() -> Int {
+        guard let startDate = user.productionStartDate else { return 0 }
+        let totalDays = user.productionDurationInDays
+        guard totalDays > 0 else { return 0 }
+        
+        let calendar = Calendar.current
+        let today = Date()
+        
+        let daysElapsed = calendar.dateComponents([.day], from: startDate, to: today).day ?? 0
+        
+        if daysElapsed < 0 { return 0 }
+        
+        let progress = Double(daysElapsed) / Double(totalDays) * 100.0
+        return Int(min(max(progress, 0.0), 100.0))
+    }
+    
+    private func loadForecast() async {
+        isLoading = true
+        do {
+            forecast = try await downloader.fetchForecast(lat: 30.2672, lon: -97.7431) // Austin
+        } catch {
+            errorMessage = error.localizedDescription
         }
-        .padding()
-        .background(Color(UIColor.systemGray6))
-        .cornerRadius(10)
+        isLoading = false
     }
 }
 
-struct CPMView: View {
-    @State private var launchDate: Date? = nil
+
+// MARK: - ActivityPositions (ProjectView.swift에서 가져옴)
+private class ActivityPositions: ObservableObject {
+    @Published var positions: [Int: (top: CGPoint, bottom: CGPoint)] = [:] // Activity ID가 Int라고 가정
+    
+    func updatePosition(for id: Int, top: CGPoint, bottom: CGPoint) {
+        positions[id] = (top, bottom)
+    }
+    
+    func position(for id: Int) -> (top: CGPoint, bottom: CGPoint)? {
+        return positions[id]
+    }
+}
+
+
+// MARK: - CPM 그래픽 관련 뷰 (ProjectView.swift에서 가져오거나 수정)
+
+private struct GraphicalResultView: View {
+    // @Query 대신 Activity 배열을 직접 받도록 수정
+    let activities: [Activity] // SwiftData의 Activity 모델 사용
+    @EnvironmentObject var activityPositions: ActivityPositions
+    
+    // Function to group and sort activities by `earlyStart`
+    private func groupedAndSortedActivities() -> [[Activity]] {
+        guard !activities.isEmpty else { return [] }
+        let grouped = Dictionary(grouping: activities) { $0.earlyStart }
+        return grouped.sorted { $0.key < $1.key }.map { $0.value.sorted(by: { $0.id < $1.id }) } // 그룹 내에서도 ID로 정렬
+    }
+    
+    var body: some View {
+        ZStack {
+            if activities.isEmpty {
+                Text("표시할 CPM 활동이 없습니다.")
+                    .padding()
+            } else {
+                ZStack(alignment: .topLeading) {
+                    VStack(alignment: .leading, spacing: 20) { // spacing 추가
+                        ForEach(groupedAndSortedActivities(), id: \.self) { activityGroup in
+                            HStack(spacing: 10) {
+                                ForEach(activityGroup) { activity in // id: \.id 제거 (Identifiable이므로)
+                                    ActivityBlockView(activity: activity)
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                    
+                    ArrowOverlay(activities: activities) // activities 전달
+                }
+                .coordinateSpace(name: "ChartSpace")
+            }
+        }
+    }
+}
+
+private struct ActivityBlockView: View {
+    var activity: Activity // SwiftData의 Activity 모델 사용
+    @EnvironmentObject var activityPositions: ActivityPositions
+    
+    var body: some View {
+        VStack(alignment: .center, spacing: 4) { // 내용 정렬 및 간격
+            Text("\(activity.name)")
+                .font(.caption.bold())
+                .foregroundColor(.black)
+                .lineLimit(1)
+            Text("ID: \(activity.id)")
+                .font(.caption2)
+                .foregroundColor(.black.opacity(0.8))
+            Text("Duration: \(activity.duration)")
+                .font(.caption2)
+                .foregroundColor(.black.opacity(0.8))
+            
+            Divider().background(Color.black.opacity(0.5))
+            
+            HStack {
+                Text("ES: \(activity.earlyStart)")
+                Spacer()
+                Text("EF: \(activity.earlyFinish)")
+            }
+            .font(.caption2)
+            .foregroundColor(.black.opacity(0.9))
+            
+            HStack {
+                Text("LS: \(activity.lateStart)")
+                Spacer()
+                Text("LF: \(activity.lateFinish)")
+            }
+            .font(.caption2)
+            .foregroundColor(.black.opacity(0.9))
+            
+            Text("Float: \(activity.totalFloat)")
+                .font(.caption2.bold())
+                .foregroundColor(activity.totalFloat == 0 ? .orange : .black.opacity(0.9))
+            
+            
+        }
+        .padding(8) // 내부 패딩
+        .frame(width: 120, height: 150) // 크기 고정 또는 유동적으로
+        .background(activity.totalFloat == 0 ? Color(UIColor.systemGray6):Color(UIColor.systemGray4))//Color.red.opacity(0.8) : Color.blue.opacity(0.7))
+        .cornerRadius(8)
+        .shadow(radius: 3)
+        .background(GeometryReader { geometry in
+            Color.clear
+                .onAppear {
+                    let frame = geometry.frame(in: .named("ChartSpace"))
+                    let topCenter = CGPoint(x: frame.midX, y: frame.minY)
+                    let bottomCenter = CGPoint(x: frame.midX, y: frame.maxY)
+                    activityPositions.updatePosition(
+                        for: activity.id,
+                        top: topCenter,
+                        bottom: bottomCenter
+                    )
+                }
+        })
+    }
+}
+
+private struct ArrowOverlay: View {
+    @EnvironmentObject var activityPositions: ActivityPositions
+    let activities: [Activity] // @Query 대신 직접 받음
+    
+    var body: some View {
+        Canvas { context, size in
+            for activity in activities {
+                guard let positions = activityPositions.position(for: activity.id) else {
+                    // print("ArrowOverlay: Position not found for activity \(activity.id)")
+                    continue
+                }
+                // Activity 모델에 successors가 Activity 객체 배열로 이미 있다고 가정
+                for successorActivity in activity.successors {
+                    guard let successorPositions = activityPositions.position(for: successorActivity.id) else {
+                        // print("ArrowOverlay: Position not found for successor \(successorActivity.id) of activity \(activity.id)")
+                        continue
+                    }
+                    drawArrow(from: positions.bottom, to: successorPositions.top, in: context)
+                }
+            }
+        }
+    }
+    
+    func drawArrow(from start: CGPoint, to end: CGPoint, in context: GraphicsContext) {
+        var path = Path()
+        path.move(to: start)
+        path.addLine(to: end)
+        
+        let arrowHeadLength: CGFloat = 10 // 화살촉 크기 조정
+        let arrowHeadAngle: CGFloat = .pi / 7  // 30도에서 약간 조정
+        
+        let angle = atan2(end.y - start.y, end.x - start.x)
+        
+        let arrowPoint1 = CGPoint(
+            x: end.x - arrowHeadLength * cos(angle + arrowHeadAngle),
+            y: end.y - arrowHeadLength * sin(angle + arrowHeadAngle)
+        )
+        let arrowPoint2 = CGPoint(
+            x: end.x - arrowHeadLength * cos(angle - arrowHeadAngle),
+            y: end.y - arrowHeadLength * sin(angle - arrowHeadAngle)
+        )
+        
+        context.stroke(path, with: .color(.black.opacity(0.7)), lineWidth: 1.5) // 라인 스타일 조정
+        
+        var arrowHead = Path()
+        arrowHead.move(to: end)
+        arrowHead.addLine(to: arrowPoint1)
+        arrowHead.addLine(to: arrowPoint2)
+        arrowHead.closeSubpath() // 삼각형 닫기
+        
+        context.fill(arrowHead, with: .color(.black.opacity(0.7))) // 채우기
+    }
+}
+
+// MARK: - CPMView 수정
+private struct CPMView: View {
+    @Environment(\.modelContext) private var modelContext // SwiftData modelContext
     @Bindable var user: User
-    let totalEarthUsersSendingRobots = 11095
-    // CPM 서비스를 위한 인스턴스
-    private let cpmService = CPMService()
-    // 계산된 예상 도착 날짜를 저장할 상태 변수
+    
+    private let cpmService = CPMService() // CPM 계산 서비스
+    @State private var cpmCalculatedActivities: [Activity] = [] // 화면에 표시할 Activity 배열
+    @StateObject private var activityPositions = ActivityPositions() // 그래픽 뷰를 위한 위치 관리자
+    
     @State private var estimatedArrivalDateString: String = "계산 중..."
+    @State private var projectStartDate: Date = Date() // CPM 시작일, 필요에 따라 설정
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX") // 월 이름 영어 고정
+        return formatter
+    }()
+    
+    // User 데이터를 기반으로 CPM 액티비티를 구성하고 계산하여 @State 변수를 업데이트하는 함수
+    private func calculateAndPrepareCPMData() {
+        // 1. User 데이터 기반으로 CPM 계산용 활동 정의 (CPMService가 사용하는 구조체 사용)
+        let productionWaitDuration = user.waitList > 0 ? max(1, Int(round(Double(user.waitList) / round(Double(user.productionCapacity))))) : 0
+        let robotProductionDays = user.productionDurationInDays // User 모델에 이 필드 필요
+        let spaceFlightDuration = (user.selectedBot == "Gen6") ? 203 : 210 // 예시
+        
+        let serviceActivities: [CPMActivity] = [ // CPMService 내부 구조체 사용 명시
+            CPMActivity(id: "1", name: "Awaiting Production", duration: productionWaitDuration, predecessors: []),
+            CPMActivity(id: "2", name: "Parts Procurement", duration: 10, predecessors: []),
+            
+            CPMActivity(id: "3", name: "Robot Production", duration: robotProductionDays, predecessors: ["1", "2"]),
+            
+            CPMActivity(id: "4", name: "System Integration & Testing", duration: 2, predecessors: ["3"]),
+            
+            CPMActivity(id: "5", name: "Calibration", duration: 1, predecessors: ["3"]),
+            CPMActivity(id: "6", name: "Transport to Launch Site", duration: 3, predecessors: ["4", "5"]),
+            CPMActivity(id: "7", name: "Launch Preparation", duration: 1, predecessors: ["6"]),
+            CPMActivity(id: "8", name: "Final Systems Check", duration: 1, predecessors: ["6"]),
+            CPMActivity(id: "9", name: "Propellant Loading", duration: 1, predecessors: ["6"]),
+            CPMActivity(id: "10", name: "Terminal Countdown & Go/No-Go Poll", duration: 1, predecessors: ["6"]),
+            CPMActivity(id: "11", name: "Launch", duration: 1, predecessors: ["7", "8", "9", "10"]),
+            CPMActivity(id: "12", name: "Ascent & Booster Separation", duration: 0, predecessors: ["11"]),
+            CPMActivity(id: "13", name: "Orbital Refueling", duration: 1, predecessors: ["11"]),
+            CPMActivity(id: "14", name: "heavy booster earth reentry", duration: 1, predecessors: ["13"]),
+            CPMActivity(id: "15", name: "Space Flight", duration: spaceFlightDuration, predecessors: ["13"]),
+            CPMActivity(id: "16", name: "Mars Landing", duration: 1, predecessors: ["15"]),
+            CPMActivity(id: "17", name: "Calibration", duration: 1, predecessors: ["16"]),
+            CPMActivity(id: "18", name: "Delivery Complete", duration: 0, predecessors: ["17"])
+        ]
+        
+        // 2. CPM 계산 실행
+        let calculatedServiceActivities = cpmService.calculateCPM(activities: serviceActivities)
+        
+        // 3. 계산된 결과를 SwiftData의 Activity 모델로 변환
+        //    이 과정에서 ID를 Int로, predecessor/successor 관계를 Activity 객체로 매핑해야 합니다.
+        //    여기서는 SwiftData에 저장하지 않고 화면 표시용 Activity 객체를 만듭니다.
+        var tempActivities: [Activity] = []
+        var activityDict: [String: Activity] = [:] // ID 매핑용 딕셔너리
+        
+        for serviceActivity in calculatedServiceActivities {
+            guard let activityIdInt = Int(serviceActivity.id) else { continue } // ID를 Int로 변환
+            let newActivity = Activity(
+                id: activityIdInt, // Int ID 사용
+                name: serviceActivity.name,
+                duration: serviceActivity.duration
+            )
+            newActivity.earlyStart = serviceActivity.earlyStart
+            newActivity.earlyFinish = serviceActivity.earlyFinish
+            newActivity.lateStart = serviceActivity.lateStart
+            newActivity.lateFinish = serviceActivity.lateFinish
+            newActivity.totalFloat = serviceActivity.slack
+            // freeFloat, actualStart, actualFinish 등은 필요시 추가 계산
+            
+            tempActivities.append(newActivity)
+            activityDict[serviceActivity.id] = newActivity
+        }
+        
+        // Predecessor/Successor 관계 설정
+        for serviceActivity in calculatedServiceActivities {
+            guard let currentSwiftDataActivity = activityDict[serviceActivity.id] else { continue }
+            
+            currentSwiftDataActivity.predecessors = serviceActivity.predecessorIDs.compactMap { predIdString in
+                activityDict[predIdString]
+            }
+            currentSwiftDataActivity.successors = serviceActivity.successorIDs.compactMap { succIdString in
+                activityDict[succIdString]
+            }
+        }
+        
+        self.cpmCalculatedActivities = tempActivities
+
+        var shouldSaveChanges = false // 변경 사항이 있을 때만 저장하기 위한 플래그
+        
+        // 4. 예상 도착일 계산 및 User 모델 업데이트
+        // 최종 활동 ID를 "Delivery Complete"의 ID인 18로 수정합니다.
+        if let finalActivity = self.cpmCalculatedActivities.first(where: { $0.id == 18 }) {
+            let totalDaysFromProjectStart = finalActivity.earlyFinish
+            
+            if let arrivalDate = Calendar.current.date(byAdding: .day, value: totalDaysFromProjectStart, to: projectStartDate) {
+                self.estimatedArrivalDateString = self.dateFormatter.string(from: arrivalDate) // UI 표시용 문자열 업데이트
+                
+                // User 모델의 estimatedArrivalAtMarsDate 업데이트 (값이 변경되었을 경우에만)
+                if user.estimatedArrivalAtMarsDate != arrivalDate {
+                    user.estimatedArrivalAtMarsDate = arrivalDate
+                    shouldSaveChanges = true
+                }
+            } else {
+                self.estimatedArrivalDateString = "날짜 계산 오류" //
+                if user.estimatedArrivalAtMarsDate != nil { // 기존 날짜가 있었다면 nil로 변경
+                    user.estimatedArrivalAtMarsDate = nil
+                    shouldSaveChanges = true
+                }
+            }
+        } else {
+            self.estimatedArrivalDateString = "계산 불가" //
+            if user.estimatedArrivalAtMarsDate != nil { // 기존 날짜가 있었다면 nil로 변경
+                user.estimatedArrivalAtMarsDate = nil
+                shouldSaveChanges = true
+            }
+        }
+        
+        // 변경 사항이 있을 경우에만 modelContext.save() 호출 및 로그 기록
+        if shouldSaveChanges {
+            do {
+                try modelContext.save()
+                print("CPM Update: User data saved successfully for user '\(user.name)'. Estimated arrival: \(user.estimatedArrivalAtMarsDate != nil ? dateFormatter.string(from: user.estimatedArrivalAtMarsDate!) : "N/A")")
+            } catch {
+                print("Error: Failed to save user data after CPM update: \(error.localizedDescription)")
+            }
+        }
+    }
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Your Order")
+                Text("Order Status")
                     .font(.headline)
                     .padding(.horizontal)
-                    .foregroundColor(Color(UIColor.label)) // 라이트 모드에 적합한 텍스트 색상
+                    .foregroundColor(Color(UIColor.label))
                 
-                StatusCardView(
-                    title: "My Optimus \(user.selectedBot ?? "Bot") Journey",
-                    iconName: "shippingbox",
-                    iconColor: .orange
+                StatusCardView( // 기존 StatusCardView 재활용 또는 CPM 전용 카드 생성
+                    title: "Major Events",
+                    iconName: "calendar.day.timeline.left",
+                    iconColor: .cyan
                 ) {
-                    HStack(spacing: 12) {
-                        
-                        // Shipment Status Box
-                        VStack(spacing: 4) {
-                            Text("Shipment Status")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                            
-                            Text(user.productionStatus ?? "Ongoing Production")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                                .multilineTextAlignment(.center)
-                                .fixedSize(horizontal: false, vertical: true)
-                            
-                            if let launchDate = launchDate {
-                                Text("Launch scheduled for \(launchDate.formatted(.dateTime.month().day()))")
-                                    .font(.caption2)
-                                    .foregroundColor(.gray)
-                                    .multilineTextAlignment(.center)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 100)
-                        .padding(12)
-                        .background(Color(.systemGray5))
-                        .cornerRadius(10)
-                        
-                        StatusInfoBox(
-                            title: "Queue Number",
-                            value: "\(user.waitList)"
-                        )
-                        
-                        StatusInfoBox(
-                            title: "Expected Arrival",
-                            value: user.estimatedArrivalAtMarsDate?
-                                .formatted(.dateTime.month().day().year()) ?? "Yet to Launch"
-                        )
+                    VStack(alignment: .leading) {
+                        InfoRow(label: "Order Date", value: projectStartDate.formatted(date: .abbreviated, time: .omitted))
+                        InfoRow(label: "Expected Arrival", value: estimatedArrivalDateString)
                     }
                 }
+                .padding(.horizontal)
+                
+                StatusCardView(
+                    title: "CPM Graphic",
+                    iconName: "cart",
+                    iconColor: .orange
+                ) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            if !cpmCalculatedActivities.isEmpty {
+                                GraphicalResultView(activities: cpmCalculatedActivities)
+                                    .fixedSize(horizontal: true, vertical: true)
+                                    .environmentObject(activityPositions)
+                            } else {
+                                Text("CPM 데이터를 로드 중이거나, 표시할 활동이 없습니다.")
+                                    .padding()
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
             }
-            .padding()
+            .padding(.vertical) // 전체 VStack에 대한 수직 패딩
         }
         .onAppear {
-            launchDate = LaunchScheduleLoader.loadLaunchDate()
+            calculateAndPrepareCPMData()
         }
-        .background(Color.white)
-    }
-    // 예상 도착 시간을 계산하고 UI를 업데이트하는 함수
-    private func calculateAndUpdateEstimatedArrival() {
-        // 1. 활동 정의 (사용자 데이터 및 선택된 모델 기반)
-        // user.waitList가 0이면 생산 대기 시간도 0이 되도록 처리
-        let productionWaitDuration = user.waitList > 0 ? max(1, Int(round(Double(user.waitList) / 5000.0))) : 0
-        
-        let activities: [CPMActivity] = [
-            // "A"라는 시작점이 없으므로, 첫 활동의 predecessors는 비워둡니다.
-            CPMActivity(id: "B", name: "로봇 생산 대기", duration: productionWaitDuration, predecessors: []),
-            CPMActivity(id: "C", name: "로봇 생산", duration: 2, predecessors: ["B"]),
-            CPMActivity(id: "D", name: "로봇 캘리브레이션 (지구)", duration: 1, predecessors: ["C"]),
-            CPMActivity(id: "E", name: "발사장 운송", duration: 3, predecessors: ["D"]),
-            CPMActivity(id: "F", name: "발사 대기", duration: 20, predecessors: ["E"]),
-            CPMActivity(id: "G", name: "발사", duration: 1, predecessors: ["F"]),
-            CPMActivity(id: "H", name: "우주 비행", duration: 203, predecessors: ["G"]),
-            CPMActivity(id: "I", name: "화성 착륙", duration: 1, predecessors: ["H"]),
-            // ID "I" 중복 수정 및 선행 작업 수정
-            CPMActivity(id: "J", name: "로봇 캘리브레이션 (화성)", duration: 1, predecessors: ["I"])
-        ]
-        
-        // 2. CPM 계산 실행
-        let calculatedActivities = cpmService.calculateCPM(activities: activities)
-        
-        // 3. "화성 착륙" 활동의 EF(Early Finish) 찾기
-        //    여기서는 마지막 활동인 "로봇 캘리브레이션 (화성)"의 EF를 기준으로 합니다.
-        //    또는 특정 ID ("I" - 화성 착륙)의 EF를 사용할 수도 있습니다.
-        if let marsLandingCalibrationActivity = calculatedActivities.first(where: { $0.id == "J" }) {
-            let totalDays = marsLandingCalibrationActivity.earlyFinish
-            
-            // 현재 날짜에 총 소요 일수를 더하여 예상 도착 날짜 계산
-            let calendar = Calendar.current
-            if let arrivalDate = calendar.date(byAdding: .day, value: totalDays, to: Date()) {
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy/M/d"
-                estimatedArrivalDateString = dateFormatter.string(from: arrivalDate)
-            } else {
-                estimatedArrivalDateString = "날짜 계산 오류"
-            }
-        } else if let marsLandingActivity = calculatedActivities.first(where: { $0.id == "I" }) { // J가 없다면 I 기준
-            let totalDays = marsLandingActivity.earlyFinish
-            let calendar = Calendar.current
-            if let arrivalDate = calendar.date(byAdding: .day, value: totalDays, to: Date()) {
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy/M/d"
-                estimatedArrivalDateString = dateFormatter.string(from: arrivalDate)
-            } else {
-                estimatedArrivalDateString = "날짜 계산 오류"
-            }
-        }
-        else {
-            estimatedArrivalDateString = "계산 불가"
-            // CPM 계산 실패 또는 "J" 활동을 찾을 수 없는 경우
-            if calculatedActivities.isEmpty && !activities.isEmpty {
-                Logger.logError("CPM calculation failed, possibly due to a cycle or graph error.")
-            } else {
-                Logger.logError("Could not find Mars landing calibration activity (ID: J) in CPM results.")
-            }
-        }
-    }
-    // User 객체의 estimatedArrivalAtMarsDate를 업데이트하는 함수
-    private func updateUserEstimatedArrivalDate() {
-        // calculateAndUpdateEstimatedArrival() 함수와 유사하게 CPM을 다시 계산하거나,
-        // 이미 계산된 estimatedArrivalDateString을 Date 객체로 변환하여 저장합니다.
-        // 여기서는 간단히 현재 계산된 문자열을 기반으로 Date를 다시 만듭니다.
-        
-        // 주의: 이 방식은 estimatedArrivalDateString이 항상 유효한 날짜 문자열일 때만 정확합니다.
-        // 더 견고한 방법은 calculateAndUpdateEstimatedArrival 내부에서 Date 객체를 저장해두고 사용하는 것입니다.
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy/M/d"
-        if let date = dateFormatter.date(from: estimatedArrivalDateString) {
-            user.estimatedArrivalAtMarsDate = date
-            Logger.logInfo("User's estimatedArrivalAtMarsDate updated to: \(date)")
-        } else {
-            // 만약 estimatedArrivalDateString이 "계산 중...", "날짜 계산 오류", "계산 불가" 등이라면
-            // user.estimatedArrivalAtMarsDate를 nil로 설정하거나 이전 값을 유지할 수 있습니다.
-            // 여기서는 nil로 설정하지 않고, 오류 로그만 남깁니다.
-            Logger.logError("Could not parse estimatedArrivalDateString ('\(estimatedArrivalDateString)') to Date for User object.")
-        }
+        .background(Color.white) // 배경색 일관성 유지
     }
 }
 
+
+
+
 // MARK: - MenuView 정의
 
-//struct MenuView: View {
-//    @Environment(\.modelContext) private var modelContext
-//    @Bindable var user: User // 현재 사용자 정보
-//    @Binding var path: [Route] // 네비게이션 경로 (로그아웃 시 초기화용이지만, 실제 초기화는 logoutAction에서)
-//    let logoutAction: () -> Void // AppView에서 전달받은 로그아웃 처리 함수
-//
-//    // 메뉴 항목 데이터 구조체 (예시)
-//    struct MenuItem: Identifiable {
-//        let id = UUID()
-//        let name: String
-//        let iconName: String
-//        let destination: AnyView? // 실제 이동할 뷰 (지금은 nil)
-//
-//        init(name: String, iconName: String, destination: AnyView? = nil) {
-//            self.name = name
-//            self.iconName = iconName
-//            self.destination = destination
-//        }
-//    }
-//
-//    // 예시 메뉴 항목들
-//    let menuItems1: [MenuItem] = [
-//        MenuItem(name: "토스프라임 멤버십", iconName: "star.fill"),
-//        MenuItem(name: "연금 준비", iconName: "figure.walk"),
-//        MenuItem(name: "사장님·광고", iconName: "person.badge.shield.checkmark.fill"),
-//        MenuItem(name: "머니라운지", iconName: "message.fill"),
-//        MenuItem(name: "멤버십 포인트", iconName: "p.circle.fill"),
-//        MenuItem(name: "편의점 택배", iconName: "shippingbox.fill")
-//    ]
-//
-//    let menuItems2: [MenuItem] = [
-//        MenuItem(name: "내 토스인증서", iconName: "checkmark.shield.fill")
-//    ]
-//
-//    let menuItems3: [MenuItem] = [
-//        MenuItem(name: "토스 계정 통합 서비스", iconName: "arrow.triangle.2.circlepath.circle.fill"),
-//        MenuItem(name: "24시간 고객센터", iconName: "headphones.circle.fill"),
-//        MenuItem(name: "토스 새소식", iconName: "megaphone.fill"),
-//        MenuItem(name: "스크린리더 새소식", iconName: "accessibility.fill")
-//    ]
-//
-//    var body: some View {
-//        NavigationView { // MenuView 자체 네비게이션 바를 위해 추가 (선택적)
-//            VStack(spacing: 0) {
-//                ScrollView {
-//                    VStack(alignment: .leading, spacing: 0) {
-//                        // 섹션 1
-//                        menuSection(items: menuItems1, header: "토스 서비스")
-//
-//                        // 섹션 2: 편의
-//                        menuSection(items: menuItems2, header: "편의")
-//
-//                        // 섹션 3: 도움말
-//                        menuSection(items: menuItems3, header: "도움말")
-//
-//                        Spacer(minLength: 30) // 로그아웃 버튼 위의 여백
-//                    }
-//                }
-//
-//                // 로그아웃 버튼 (화면 하단에 위치)
-//                Button(action: {
-//                    // 1. 사용자 데이터 삭제
-//                    modelContext.delete(user)
-//                    do {
-//                        try modelContext.save()
-//                        Logger.logInfo("User \(user.id) data deleted successfully.") // Logger가 정의되어 있다고 가정
-//                    } catch {
-//                        Logger.logError("Failed to delete user \(user.id) data: \(error.localizedDescription)")
-//                    }
-//
-//                    // 2. AppView의 로그아웃 처리 함수 호출 (path 초기화 및 로딩화면으로 전환)
-//                    logoutAction()
-//                }) {
-//                    Text("로그아웃")
-//                        .fontWeight(.semibold)
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(Color(UIColor.systemGray5)) // 라이트모드에 맞는 배경
-//                        .foregroundColor(Color.red)
-//                        .cornerRadius(10)
-//                }
-//                .padding(.horizontal)
-//                .padding(.bottom, 10) // 하단 여백
-//            }
-//            .background(Color.white) // MenuView 배경색
-//            .navigationTitle("전체")
-//            .navigationBarTitleDisplayMode(.inline)
-//            .toolbar { // 상단 검색, 설정 아이콘 (UI만)
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    HStack {
-//                        Button(action: {}) { Image(systemName: "magnifyingglass") }
-//                        Button(action: {}) { Image(systemName: "gearshape.fill") }
-//                    }
-//                    .foregroundColor(Color(UIColor.label)) // 라이트 모드 아이콘 색상
-//                }
-//            }
-//        }
-//        .environment(\.colorScheme, .light) // MenuView도 라이트모드 강제
-//        // NavigationView를 사용한다면, EarthSideView의 .navigationBarHidden(true)와 충돌하지 않도록
-//        // EarthSideView의 TabView 내에서 MenuView를 감싸는 NavigationView는 제거하거나 조건부로 처리해야 할 수 있습니다.
-//        // 여기서는 MenuView가 자체적으로 네비게이션 바를 가지도록 했습니다.
-//        // EarthSideView 전체가 .navigationBarHidden(true)이므로, 이 NavigationView는 나타나지 않을 수 있습니다.
-//        // 이 경우, .navigationTitle, .toolbar 등은 효과가 없을 수 있으며, 커스텀 헤더를 만들어야 합니다.
-//        // 더 간단하게는 NavigationView 없이 VStack과 ScrollView만 사용하고, 헤더는 EarthSideView의 topBar를 공유하거나 자체적으로 만듭니다.
-//        // 지금은 우선 요청하신 메뉴 목록과 로그아웃 버튼 구현에 집중했습니다.
-//        // 만약 EarthSideView의 minimalistTopBar를 사용하고 싶다면, MenuView의 NavigationView를 제거하고,
-//        // 제목 "전체"는 EarthSideView의 topBar가 동적으로 변경되도록 처리해야 합니다.
-//        // 가장 간단한 접근은 MenuView 내 NavigationView를 사용하지 않고, 콘텐츠만 VStack에 담는 것입니다.
-//        // 이 경우, 아래와 같이 수정합니다.
-//        /*
-//         // -- NavigationView 없는 버전의 body 시작 --
-//         VStack(spacing: 0) {
-//             // 커스텀 헤더 (필요시)
-//             HStack {
-//                 Text("전체") // 또는 EarthSideView의 topBar와 연동
-//                     .font(.system(size: 20, weight: .semibold))
-//                     .foregroundColor(Color(UIColor.label))
-//                 Spacer()
-//                 HStack {
-//                     Button(action: {}) { Image(systemName: "magnifyingglass") }
-//                     Button(action: {}) { Image(systemName: "gearshape.fill") }
-//                 }
-//                 .foregroundColor(Color(UIColor.label))
-//             }
-//             .padding()
-//             .background(Color(UIColor.systemGray6))
-//
-//
-//             ScrollView {
-//                 // ... (menuSection 로직 동일) ...
-//             }
-//
-//             // ... (로그아웃 버튼 로직 동일) ...
-//         }
-//         .background(Color.white)
-//         .environment(\.colorScheme, .light)
-//         // -- NavigationView 없는 버전의 body 끝 --
-//         */
-//    }
-//
-//    // 메뉴 섹션 헬퍼 뷰
-//    private func menuSection(items: [MenuItem], header: String? = nil) -> some View {
-//        VStack(alignment: .leading, spacing: 0) {
-//            if let header = header, !header.isEmpty {
-//                Text(header)
-//                    .font(.footnote)
-//                    .foregroundColor(.gray)
-//                    .padding(.horizontal)
-//                    .padding(.top, 20)
-//                    .padding(.bottom, 8)
-//            }
-//            ForEach(items) { item in
-//                Button(action: {
-//                    // 각 메뉴 아이템 클릭 시 동작 (현재는 없음)
-//                    print("\(item.name) clicked")
-//                }) {
-//                    HStack(spacing: 16) {
-//                        Image(systemName: item.iconName)
-//                            .font(.system(size: 20))
-//                            .frame(width: 24)
-//                            .foregroundColor(Color(UIColor.darkGray)) // 아이콘 색상
-//                        Text(item.name)
-//                            .font(.system(size: 16))
-//                            .foregroundColor(Color(UIColor.label)) // 텍스트 색상
-//                        Spacer()
-//                        // 부가 정보 (예: "최대 4% 캐시백") 등은 필요시 추가
-//                        Image(systemName: "chevron.right") // 오른쪽 화살표
-//                            .font(.system(size: 14, weight: .semibold))
-//                            .foregroundColor(.gray.opacity(0.5))
-//                    }
-//                    .padding(.horizontal)
-//                    .padding(.vertical, 14)
-//                }
-//                Divider().padding(.leading, 50) // 아이콘 너비만큼 들여쓰기 된 Divider
-//            }
-//        }
-//    }
-//}
+private func MenuView(user: User, modelContext: ModelContext, logoutAction: @escaping () -> Void) -> some View {
+    ScrollView {
+        VStack {
+            Spacer()
+            
+            Button(action: {
+                modelContext.delete(user)
+                do {
+                    try modelContext.save()
+                    logoutAction()
+                } catch {
+                    print("⚠️ 사용자 삭제 실패: \(error.localizedDescription)")
+                }
+                logoutAction()
+            }) {
+                Text("Log out")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(UIColor.systemGray5))
+                    .foregroundColor(.red)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+        }
+        .background(Color.white)
+    }
+}
+struct EarthSearchView: View {
+    @State private var searchText: String = ""
+    @State private var searchURL: URL? // 웹뷰에 로드할 URL 상태 변수
+    @State private var isLoadingWebView: Bool = false // 웹뷰 로딩 상태 (선택 사항)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) { // spacing을 0으로 조정하고 내부에서 패딩 관리
+            // 검색창 및 검색 버튼
+            HStack {
+                TextField("Google에서 검색...", text: $searchText, onCommit: performSearch)
+                    .padding(10)
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(10)
+                    .foregroundColor(.primary)
+                    .font(.body)
+                
+                Button(action: performSearch) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title2)
+                }
+                .padding(.leading, 5)
+            }
+            .padding(.horizontal)
+            .padding(.top) // VStack의 .padding(.top)을 HStack으로 이동
+            .padding(.bottom, 10) // 검색창 아래 약간의 여백
+
+            // 웹뷰 또는 플레이스홀더 텍스트
+            if let url = searchURL {
+                ZStack {
+                    WebView(url: url) // 정의한 WebView 사용
+                    if isLoadingWebView { // 선택적 로딩 인디케이터
+                        ProgressView()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // 웹뷰 로드 시작/종료 시 isLoadingWebView 상태를 변경하려면 WebView의 Coordinator 사용 필요
+            } else {
+                VStack { // 플레이스홀더 텍스트를 중앙에 배치하기 위한 VStack
+                    Spacer()
+                    if !searchText.isEmpty {
+                        Text("'\(searchText)'에 대한 검색 결과를 보려면 Enter 또는 검색 버튼을 누르세요.")
+                            .padding(.horizontal)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("Google에서 검색할 내용을 입력하세요.")
+                            .padding(.horizontal)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .background(Color.white) // 전체 배경색
+        // .padding(.top) // 이 패딩은 HStack으로 옮김
+    }
+
+    private func performSearch() {
+        let trimmedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedSearchText.isEmpty else {
+            searchURL = nil // 검색어가 비어있으면 웹뷰 숨김
+            return
+        }
+
+        if let encodedQuery = trimmedSearchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+           let url = URL(string: "https://www.google.com/search?q=\(encodedQuery)") {
+            searchURL = url
+            // isLoadingWebView = true // 웹뷰 로딩 시작 (Coordinator와 연동 필요)
+        } else {
+            searchURL = nil
+            // 여기에 URL 생성 실패에 대한 사용자 알림 추가 가능
+            print("Error: Could not create search URL for query: \(trimmedSearchText)")
+        }
+        // 키보드 내리기 (선택 사항)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+
+private func SearchView() -> some View {
+    @State var searchText: String = ""
+
+    return VStack(alignment: .leading, spacing: 16) {
+        // 검색창
+        TextField("Search anything...", text: $searchText)
+            .padding(10)
+            .background(Color(UIColor.systemGray6))
+            .cornerRadius(10)
+            .padding(.horizontal)
+            .foregroundColor(.primary)
+            .font(.body)
+        
+        // 결과 영역 (현재는 입력 텍스트 출력)
+        if !searchText.isEmpty {
+            Text("You searched for: \(searchText)")
+                .padding(.horizontal)
+                .foregroundColor(.secondary)
+        } else {
+            Text("Try typing something above.")
+                .padding(.horizontal)
+                .foregroundColor(.secondary)
+        }
+        
+        Spacer()
+    }
+    .padding(.top)
+    .background(Color.white)
+}
+
+
+private struct WebView: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        // 웹뷰의 탐색 동작을 관리하기 위한 델리게이트 설정 (선택 사항)
+        // webView.navigationDelegate = context.coordinator
+        return webView
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        let request = URLRequest(url: url)
+        uiView.load(request)
+    }
+
+    // Coordinator 클래스는 웹뷰의 탐색 이벤트를 처리할 때 필요할 수 있습니다. (선택 사항)
+    // func makeCoordinator() -> Coordinator {
+    //     Coordinator(self)
+    // }
+    //
+    // class Coordinator: NSObject, WKNavigationDelegate {
+    //     var parent: WebView
+    //
+    //     init(_ parent: WebView) {
+    //         self.parent = parent
+    //     }
+    //
+    //     // 예: 페이지 로딩 완료 시 호출
+    //     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    //         print("Webview did finish loading page")
+    //     }
+    // }
+}
 
 // StatusInfoBox 헬퍼 뷰 (라이트 모드 스타일 명시)
-struct StatusInfoBox: View {
+private struct StatusInfoBox: View {
     let title: String
     let value: String
     
@@ -639,26 +822,26 @@ struct StatusInfoBox: View {
         VStack(spacing: 4) {
             Text(title)
                 .font(.footnote)
-                .foregroundColor(Color(UIColor.secondaryLabel)) // 라이트 모드용 보조 텍스트 색상
+                .foregroundColor(Color(UIColor.secondaryLabel))
                 .multilineTextAlignment(.center)
             
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundColor(Color(UIColor.label)) // 라이트 모드용 주요 텍스트 색상
+                .foregroundColor(Color(UIColor.label))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 100)
         .padding(12)
-        .background(Color(UIColor.systemGray5)) // 명시적인 밝은 회색 배경 (라이트 모드)
+        .background(Color(UIColor.systemGray6))
         .cornerRadius(10)
     }
 }
 
 
-struct StatusCardView<Content: View>: View {
+private struct StatusCardView<Content: View>: View {
     let title: String
     let iconName: String
     let iconColor: Color
@@ -680,11 +863,11 @@ struct StatusCardView<Content: View>: View {
         .padding()
         .background(Color.white)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.09), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
     }
 }
 
-struct InfoRow: View {
+private struct InfoRow: View {
     let label: String
     let value: String
     
@@ -702,12 +885,12 @@ struct InfoRow: View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(Color(UIColor.secondaryLabel)) // 라이트 모드용 보조 텍스트 색상
+                .foregroundColor(Color(UIColor.secondaryLabel))
             Spacer()
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundColor(Color(UIColor.label)) // 라이트 모드용 주요 텍스트 색상
+                .foregroundColor(Color(UIColor.label))
         }
     }
 }

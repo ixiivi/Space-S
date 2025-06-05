@@ -41,8 +41,7 @@ Podfile.lock
 # 로그 파일 무시
 *.log
 
-# 환경 설정 파일 무시
-.env
+# 환경 설정 파일 무시 .env
 
 # 기타
 *.orig

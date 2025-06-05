@@ -30,7 +30,7 @@ struct AppView: View {
                     LoadingView(isLoadingComplete: $isLoadingComplete)
                 } else {
                     if let user = users.first(where: { $0.isFullySetup }) {
-                            SelectEarthMarsView(path: $path, user: user)
+                        SelectEarthMarsView(path: $path, user: user)
                     } else {
                         LoginView(path: $path)
                     }
@@ -49,7 +49,7 @@ struct AppView: View {
                 case .earthSideView(let user):
                     EarthSideView(path: $path, user: user, logoutAction: logoutAndResetApp)
                 case .marsSideView(let user):
-                    MarsSideView(path: $path, user: user)
+                    MarsSideView(path: $path, user: user, logoutAction: logoutAndResetApp)
                     
                 }
                 
@@ -59,13 +59,13 @@ struct AppView: View {
         }
     }
     func logoutAndResetApp() {
-            // User 데이터 삭제는 MenuView에서 modelContext를 사용해 직접 처리합니다.
-            // 여기서는 네비게이션 경로를 초기화하고 로딩 상태를 false로 되돌립니다.
-            path.removeAll()
-            isLoadingComplete = false
-            // LoadingView의 onAppear 로직에 따라 일정 시간 후 isLoadingComplete가 true로 바뀌고,
-            // users 쿼리가 빈 상태이므로 LoginView가 표시될 것입니다.
-        }
+        // User 데이터 삭제는 MenuView에서 modelContext를 사용해 직접 처리합니다.
+        // 여기서는 네비게이션 경로를 초기화하고 로딩 상태를 false로 되돌립니다.
+        path.removeAll()
+        isLoadingComplete = false
+        // LoadingView의 onAppear 로직에 따라 일정 시간 후 isLoadingComplete가 true로 바뀌고,
+        // users 쿼리가 빈 상태이므로 LoginView가 표시될 것입니다.
+    }
 }
 
 @main
