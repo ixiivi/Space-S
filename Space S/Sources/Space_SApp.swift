@@ -29,12 +29,8 @@ struct AppView: View {
                 if !isLoadingComplete {
                     LoadingView(isLoadingComplete: $isLoadingComplete)
                 } else {
-                    if let user = users.first {
-                        if user.isFullySetup {
+                    if let user = users.first(where: { $0.isFullySetup }) {
                             SelectEarthMarsView(path: $path, user: user)
-                        } else {
-                            LoginView(path: $path)
-                        }
                     } else {
                         LoginView(path: $path)
                     }
@@ -50,12 +46,10 @@ struct AppView: View {
                     OrderCompleteView(path: $path, user: user)
                 case .selectDestination(let user):
                     SelectEarthMarsView(path: $path, user: user)
-                case .earthSideView(let user): // ◀ --- 추가된 케이스 처리
-                    EarthSideView(path: $path, user: user, logoutAction: logoutAndResetApp) // 실제 뷰로 교체 예정
-                    //Text("Earth Side View for \(user.name)") // 임시 텍스트
-                case .marsSideView(let user):  // ◀ --- 추가된 케이스 처리
-                    MarsSideView(path: $path, user: user) // 실제 뷰로 교체 예정
-                    //Text("Mars Side View for \(user.name)")   // 임시 텍스트
+                case .earthSideView(let user):
+                    EarthSideView(path: $path, user: user, logoutAction: logoutAndResetApp)
+                case .marsSideView(let user):
+                    MarsSideView(path: $path, user: user)
                     
                 }
                 
@@ -76,10 +70,12 @@ struct AppView: View {
 
 @main
 struct CM_ProjectApp: App {
+    
     var body: some Scene {
         WindowGroup {
             AppView()
         }
         .modelContainer(for: User.self)
+        
     }
 }

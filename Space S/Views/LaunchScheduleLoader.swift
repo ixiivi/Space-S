@@ -13,8 +13,10 @@ struct LaunchSchedule: Codable {
 
 class LaunchScheduleLoader {
     static func loadLaunchDate() -> Date? {
-        guard let url = Bundle.main.url(forResource: "launch_schedule", withExtension: "json") else {
-            print("launch_schedule.json not found in bundle.")
+
+        guard let url = Bundle.main.url(forResource: "launch_date_db", withExtension: "json") else {
+            print("launch_date_db.json not found in bundle.")
+
             return nil
         }
         

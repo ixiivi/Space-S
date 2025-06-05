@@ -85,21 +85,29 @@ struct LoadingView: View {
             }
         }
 
-        checkAPI1 { checkFinished(success: true) }
-        checkAPI2 { checkFinished(success: true) }
-        checkAPI3 { checkFinished(success: true) }
+        checkStatus1 { success in checkFinished(success: success) }
+        checkAPI1 { success in checkFinished(success: success) }
+        checkAPI2 { success in checkFinished(success: success) }
     }
 
-    func checkAPI1(completion: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: completion)
+    func checkStatus1(completion: @escaping (Bool) -> Void) {
+        LaunchDateGenerator.generateAndSaveUpcomingLaunchDates { success in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                completion(success)
+            }
+        }
     }
 
-    func checkAPI2(completion: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: completion)
+    func checkAPI1(completion: @escaping (Bool) -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            completion(true) // 또는 실제 로직에 따라 true/false
+        }
     }
 
-    func checkAPI3(completion: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: completion)
+    func checkAPI2(completion: @escaping (Bool) -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            completion(true) // 또는 실제 로직에 따라 true/false
+        }
     }
 }
 

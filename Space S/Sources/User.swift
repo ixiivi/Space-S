@@ -15,14 +15,14 @@ class User {
     
     public var selectedBot: String?
     public var sponsor: String?
-    public var waitList: Int = 8392119
+    public var waitList: Int = 6911211 //feches from server
     
-    var productionStatus: String?             // 예: "대기중", "생산중", "조립완료", "품질검사중", "생산완료"
+    var productionStatus: String? // 예: "대기중", "생산중", "조립완료", "품질검사중", "생산완료"
     var estimatedProductionCompleteDate: Date? // 예상 생산 완료일
     
     // 발사장 배송 (지구)
-    var shippingToLaunchSiteStatus: String?   // 예: "생산지 출발", "운송중", "발사장 도착"
-    var launchSiteLocation: String?           // 예: "케이프 커내버럴", "스타베이스"
+    var shippingToLaunchSiteStatus: String? // 예: "생산지 출발", "운송중", "발사장 도착"
+    var launchSiteLocation: String? // 예: "케이프 커내버럴", "스타베이스"
     var estimatedArrivalAtLaunchSiteDate: Date?// 발사장 예상 도착일
     
     // 발사 단계
