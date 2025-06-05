@@ -193,10 +193,18 @@ public struct BuyBotOrderView: View {
         if let spSpeedup = sponsorshipSpeedup, spSpeedup > 0, let spPrice = sponsorshipPrice {
             let selectedSponsor = sponsorList.sponsors.first { $0.price == spPrice && $0.speedUpDay == spSpeedup }
             currentUser.sponsor = selectedSponsor?.name ?? "Custom Sponsorship ($\(spPrice))"
-            currentUser.waitList = max(0, currentUser.waitList - (spSpeedup * 5000))
+            currentUser.waitList = max(0, currentUser.waitList - (spSpeedup * currentUser.productionCapacity))
         } else {
             currentUser.sponsor = nil
         }
+        if currentUser.waitList <= 0 {
+            currentUser.productionStatus = "Ongoing Production"
+            currentUser.productionStartDate = Date()
+        } else {
+            currentUser.productionStatus = "Before Production"
+        }
+        
+        
         updateUserEstimatedArrivalDate()
         
 
@@ -237,11 +245,11 @@ public struct BuyBotOrderView: View {
 
     private func calculateAndUpdateEstimatedArrival(applyingSponsorshipSpeedup speedupDays: Int) {
         let tempWaitList = max(0, currentUser.waitList - (speedupDays * 5000))
-        let productionWaitDuration = tempWaitList > 0 ? max(1, Int(round(Double(tempWaitList) / 5000.0))) : 0
+        let productionWaitDuration = tempWaitList > 0 ? max(1, Int(round(Double(tempWaitList) / round(Double(currentUser.productionCapacity))))) : 0
 
         let activities: [CPMActivity] = [
             CPMActivity(id: "B", name: "로봇 생산 대기", duration: productionWaitDuration, predecessors: []),
-            CPMActivity(id: "C", name: "로봇 생산", duration: 2, predecessors: ["B"]),
+            CPMActivity(id: "C", name: "로봇 생산", duration: currentUser.productionDurationInDays, predecessors: ["B"]),
             CPMActivity(id: "D", name: "로봇 캘리브레이션 (지구)", duration: 1, predecessors: ["C"]),
             CPMActivity(id: "E", name: "발사장 운송", duration: 3, predecessors: ["D"]),
             CPMActivity(id: "F", name: "발사 대기", duration: 20, predecessors: ["E"]),
