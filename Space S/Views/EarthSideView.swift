@@ -140,14 +140,13 @@ struct EarthHomeContentView: View {
                     iconColor: .orange
                 ) {
                     HStack(spacing: 12) {
-                        
+
                         // Shipment Status Box
                         VStack(spacing: 4) {
                             Text("Shipment Status")
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                            
                             Text(user.productionStatus ?? "Ongoing Production")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
@@ -259,7 +258,9 @@ struct EarthHomeContentView: View {
             .padding()
         }
         .onAppear {
+
             //launchDate = LaunchScheduleLoader.loadLaunchDate()
+
         }
         .background(Color.white)
     }
