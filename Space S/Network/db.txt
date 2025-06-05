@@ -1,3 +1,7 @@
+xcrun simctl get_app_container booted com.yonsei.cm.final.Space-S data
+시뮬레이터 아이디 구하는 법
+
+
 
 아래에서 단일 사용자 정보 저장에 적합한 방법을 비교하고, 추천 방식(JSON 파일 + Codable)을 중심으로 구현 예시와 사용 방법을 설명하겠습니다. 간단함, 구현 용이성, 앱 요구사항(`users`, `orders`, `cpm_schedules`) 충족을 우선 고려합니다.
 

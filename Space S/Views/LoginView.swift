@@ -122,7 +122,7 @@ struct LoginView: View {
             let newUser = User(id: userIdInput, name: name, phoneNumber: normalizedPhoneNumber)
             modelContext.insert(newUser)
             try modelContext.save()
-            
+            Logger.logInfo("user.isFullySetup : \(newUser.isFullySetup)")
             // --- 사용자 정보 출력 시작 ---
             print("--- New User Information ---")
             print("ID: \(newUser.id)")
