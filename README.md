@@ -4,6 +4,8 @@
 
 - Change ENTER_YOUR_API with your openweather api key.
 
+## Project Overview  
+
 In a future where war between humans and AI has rendered coexistence on Earth impossible, this application is designed to support the relocation of high-intelligence AI robots to Mars. Following a historic agreement between humans and AI, each person is allowed to send one robot to Mars. In exchange, participants receive the right to invest in the planet’s rare minerals.  
 
 This app streamlines the entire process, offering an intuitive and efficient platform for users. Its key features include:  
