@@ -1,6 +1,6 @@
 ## Requreiments  
 
-- 🚀 Change ENTER_YOUR_API with your openweather api key.
+- 🚀 Change ENTER_YOUR_API with your openweather api key at .env file.
 
 ## Project Overview  
 
