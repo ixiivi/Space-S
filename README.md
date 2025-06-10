@@ -1,6 +1,8 @@
 # CEE4408 Construction Project Management Final Project  
 
-## Project Overview
+## Requreiments  
+
+- Change ENTER_YOUR_API with your openweather api key.
 
 In a future where war between humans and AI has rendered coexistence on Earth impossible, this application is designed to support the relocation of high-intelligence AI robots to Mars. Following a historic agreement between humans and AI, each person is allowed to send one robot to Mars. In exchange, participants receive the right to invest in the planet’s rare minerals.  
 
@@ -17,6 +19,9 @@ This application provides a seamless experience, bridging the gap between Earth-
 <img src="https://github.com/user-attachments/assets/86128de0-53c0-4132-b47c-990dd875ef31" width="80"/>  
 
 The main application icon symbolizes the dynamic launch of a rocket, representing the ambition and innovation of construction project management. Set against a sleek black background, it features a white arch-shaped trajectory, evoking the path of a rocket soaring into space. This intuitive and modern design captures the essence of progress and precision.  
+
+<img src="https://github.com/user-attachments/assets/729f9cf0-77f6-4c9c-8c83-06f9cc67a07c" width="400"/>
+<img src="https://github.com/user-attachments/assets/00f30f25-f699-4580-be8d-486f67d1e092" width="400"/>
 
 ### LoadingView  
 <img src="https://github.com/user-attachments/assets/57f75923-cf87-41c1-8c76-fb2776183dda" width="150"/>
