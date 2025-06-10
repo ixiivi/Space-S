@@ -1,4 +1,4 @@
-# CEE4408 Construction Project Management Final Project  
+![6](https://github.com/user-attachments/assets/2b3dd259-2bf7-47cd-bb0f-dab8a9f64233)# CEE4408 Construction Project Management Final Project  
 
 ## Requreiments  
 
@@ -17,27 +17,72 @@ This app streamlines the entire process, offering an intuitive and efficient pla
 
 This application provides a seamless experience, bridging the gap between Earth-based users and the complexities of interplanetary relocation and investment.  
 
-### ICON  
-<img src="https://github.com/user-attachments/assets/86128de0-53c0-4132-b47c-990dd875ef31" width="80"/>  
+## ICON - Symbolism and Meaning  
+
+<img src="https://github.com/user-attachments/assets/a52d20be-0104-4da4-8366-c18b94882777" width="80"/>  
 
 The main application icon symbolizes the dynamic launch of a rocket, representing the ambition and innovation of construction project management. Set against a sleek black background, it features a white arch-shaped trajectory, evoking the path of a rocket soaring into space. This intuitive and modern design captures the essence of progress and precision.  
 
-<img src="https://github.com/user-attachments/assets/729f9cf0-77f6-4c9c-8c83-06f9cc67a07c" width="400"/>
-<img src="https://github.com/user-attachments/assets/00f30f25-f699-4580-be8d-486f67d1e092" width="400"/>
+## Presentation Slides
 
-### LoadingView  
-<img src="https://github.com/user-attachments/assets/57f75923-cf87-41c1-8c76-fb2776183dda" width="150"/>
+<img src="![1](https://github.com/user-attachments/assets/3a858195-0f37-4cca-86e9-add956a1a2b9)" width="700"/>  
 
-### LoginView  
-<img src="https://github.com/user-attachments/assets/66e759dd-8285-4539-8811-e72c0d64b21b" width="150"/>
+<img src="![2](https://github.com/user-attachments/assets/fd9b3e4e-b580-4599-b760-8b166af9591b)" width="700"/>  
 
-### BuyBotMainView  
-<img src="https://github.com/user-attachments/assets/f7791557-2c75-4490-82b2-7b1c922c2c02" width="150"/>
-<img src="https://github.com/user-attachments/assets/d99d0048-6a82-4f23-9128-498bc3a31518" width="150"/>
-<img src="https://github.com/user-attachments/assets/d01ff68a-a735-4856-b7e9-530cd8c2ae81" width="150"/>
+<img src="![3](https://github.com/user-attachments/assets/27bfca38-e502-4196-920b-dfe35bfe3c6c)" width="700"/>  
 
-### BuyBotOrderView  
-<img src="https://github.com/user-attachments/assets/59a41f72-3666-4b2d-8d19-c0ad9ee30c6a" width="150"/>
-<img src="https://github.com/user-attachments/assets/77b7c694-9bb0-4026-8d17-41114aa681e7" width="150"/>
-<img src="https://github.com/user-attachments/assets/0c0551a7-7750-4ecc-bcd1-e12bd17ac88b" width="150"/>
-<img src="https://github.com/user-attachments/assets/a983eea4-3854-4153-846d-899a6615a257" width="150"/>
+
+<img src="![4](https://github.com/user-attachments/assets/b6471529-b154-4001-8c85-099583ce9044)" width="700"/>  
+
+
+<img src="![5](https://github.com/user-attachments/assets/6f3cf08b-bd91-4dc8-ad1b-1cf2e3d776c2)" width="700"/>  
+
+
+<img src="![6](https://github.com/user-attachments/assets/a6d26456-5672-4f43-9fc1-85ebd7504d86)
+" width="700"/>  
+
+<img src="![7](https://github.com/user-attachments/assets/055ae4f8-089d-44b7-8c28-3522d1a2a384)
+" width="700"/>  
+
+<img src="![8](https://github.com/user-attachments/assets/0de16b58-237a-4bf9-9606-aa958d492ab0)
+" width="700"/>  
+
+<img src="![9](https://github.com/user-attachments/assets/73dbbfd9-30e3-450d-8f6d-9d69c4a6cb06)
+" width="700"/>  
+
+<img src="![10](https://github.com/user-attachments/assets/d38996e5-2455-453c-833d-65a4d2185cc9)
+" width="700"/>  
+
+<img src="![11](https://github.com/user-attachments/assets/9c1f1d6a-9ff5-42e9-924e-f240e17860aa)
+" width="700"/>  
+
+<img src="![12](https://github.com/user-attachments/assets/affaeb8a-3f6d-41c1-9b81-5edbb0fc6e4a)
+" width="700"/>  
+
+<img src="![13](https://github.com/user-attachments/assets/f78a24e9-c0a5-4a29-9761-be68adf31bfa)
+" width="700"/>  
+
+<img src="![14](https://github.com/user-attachments/assets/46d9a89e-2f62-4389-b7f0-8fd9916d1d12)
+" width="700"/>  
+
+<img src="![15](https://github.com/user-attachments/assets/ef5e849f-db11-4c92-99ff-d7d38af23a40)
+" width="700"/>  
+
+<img src="![16](https://github.com/user-attachments/assets/7273aea2-ac57-47d5-8a23-d24b7c89415d)
+" width="700"/>  
+
+<img src="![17](https://github.com/user-attachments/assets/bca81264-94a4-446a-b085-e0c2807af100)
+" width="700"/>  
+
+<img src="![18](https://github.com/user-attachments/assets/434f1274-e69e-4187-97c5-bd0a7dfdeccd)
+" width="700"/>  
+
+<img src="![19](https://github.com/user-attachments/assets/f7f6dac8-1263-4b34-b9dc-015f98603012)
+" width="700"/>  
+
+<img src="![20](https://github.com/user-attachments/assets/69b70644-4c43-408c-b38f-d7f9a9945870)" width="700"/>  
+
+
+
+
+
