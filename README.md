@@ -27,9 +27,7 @@ The main application icon symbolizes the dynamic launch of a rocket, representin
 
 <img src="https://github.com/user-attachments/assets/fd9b3e4e-b580-4599-b760-8b166af9591b" width="700"/>  
 
-Advertisement Youtube link  
-
-🔗 https://youtu.be/3q50RWhV51Q?si=rZ6T4pdQ7ZOEp4yW  
+Advertisement on Youtube  🔗 https://youtu.be/3q50RWhV51Q?si=rZ6T4pdQ7ZOEp4yW  
 
 
 <img src="https://github.com/user-attachments/assets/27bfca38-e502-4196-920b-dfe35bfe3c6c" width="700"/>  
